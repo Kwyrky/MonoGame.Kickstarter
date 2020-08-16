@@ -9,6 +9,10 @@ A bash script that sets up a MonoGame solution ready for cross-platform developm
 
 `monogame-kickstarter.sh [solutionname]`
 
+## Demo
+
+https://youtu.be/a4lmUq_F0fM
+
 ## Additional Info
 
 The parameter `[solutionname]` is optional. If the script is started without a parameter it will use the default value which is set to "MonoGameKickstarter". If you want to make the parameter mandatory you can achieve this by editing the script and setting the variable holding the default value to an empty string e.g. `solutionname=""`. You can also define a parent folder structure where the solution folder will be put in e.g. `outputdir="monogame-kickstarter"`. The script will then create the outputdir first and put everything inside it.
