@@ -13,9 +13,13 @@ A bash script that sets up a MonoGame solution ready for cross-platform developm
 
 A quick test revealed that the script can also be used with Windows in git bash!
 
-## Demo
+## Demo Linux
 
 https://youtu.be/a4lmUq_F0fM
+
+## Demo Windows
+
+https://youtu.be/qgvVs06UvW8
 
 ## Additional Info
 
