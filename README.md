@@ -9,6 +9,10 @@ A bash script that sets up a MonoGame solution ready for cross-platform developm
 
 `monogame-kickstarter.sh [solutionname]`
 
+## Works with Linux and Windows
+
+A quick test revealed that the script can also be used with Windows in git bash!
+
 ## Demo
 
 https://youtu.be/a4lmUq_F0fM
