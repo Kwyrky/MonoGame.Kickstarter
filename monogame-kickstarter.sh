@@ -35,7 +35,7 @@ echo "${outputdir}"
 echo -n 'solutionname: '
 echo "${solutionname}"
 
-if [ -z ${solutionname} ] ; then
+if [ ! -z ${solutionnameparameter} ] ; then
   solutionname=${solutionnameparameter}
 fi
 
