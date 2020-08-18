@@ -75,8 +75,14 @@ if [ "${numberofmonogametemplatesinstalled}" -eq 0 ]; then
 else
   dotnet new --list | grep "MonoGame"
 fi
-echo "${delimiter}"
 
+# MonoGame templates version
+echo "${delimiter}"
+echo "MonoGame templates version"
+monogametemplatesversionlinenumber="$(dotnet new -u | awk '/MonoGame.Templates.CSharp/{ print NR+3; exit }')"
+dotnet new -u | awk -v monogametemplatesversionlinenumber=$monogametemplatesversionlinenumber 'NR==monogametemplatesversionlinenumber { print }'
+
+echo "${delimiter}"
 # check if slndir dir exists or try to create it
 if [ -d "${slndir}" ]; then
   echo "${slndir} is a directory."
