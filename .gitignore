@@ -2,3 +2,5 @@
 [Mm]onogame-kickstarter/
 # all dirs
 */*
+# Logos
+*.png
