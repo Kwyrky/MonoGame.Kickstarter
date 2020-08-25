@@ -3,13 +3,17 @@
 
 A bash script that sets up a MonoGame solution ready for cross-platform development.
 
-## Attention
-
-**The script is currently not tested very much due to lack of time, so keep that in mind and run the script only if you checked it yourself first!**
-
 ## Usage
 
 `monogame-kickstarter.sh [solutionname]`
+
+This is all you need to do and MonoGame Kickstarter will create a solution with a MonoGame .NET Standard Library project and an OpenGL project referencing it. The OpenGL project will use code and content from the MonoGame .NET Standard Library project. Just open `Game1.cs` from the MonoGame .NET Standard Library project and you can immediately start developing your MonoGame project.
+
+## Support
+
+If you like this project and it does help you support me on Ko-fi! 
+
+https://ko-fi.com/kwyrky
 
 ## Works with Linux and Windows
 
