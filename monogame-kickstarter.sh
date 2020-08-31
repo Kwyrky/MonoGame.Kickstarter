@@ -7,6 +7,7 @@ delimiter="#####################################################################
 opengl="OpenGL"
 
 # variables
+# outputdir="k1/j2/g3"
 outputdir=""
 solutionname="MonoGameKickstarter"
 
@@ -14,7 +15,8 @@ solutionname="MonoGameKickstarter"
 solutionnameparameter="$1"
 
 ###########################################################################
-REALPATH="$(realpath "$0")"
+SCRIPTPATH="$0"
+REALPATH="$(realpath "$SCRIPTPATH")"
 BASEPATH="$(dirname "$REALPATH")"
 cat "$BASEPATH/MonoGameKickstarterLogoWhite.txt"
 ###########################################################################
@@ -49,6 +51,9 @@ fi
 [[ -n $outputdir ]] && [[ "${outputdir}" != */ ]] && outputdir="${outputdir}/"
 slndir="${outputdir}${solutionname}"
 
+# count subfolders for maxdepth
+slndirsubdirs="$(echo ${slndir} | tr -cd '/' | wc -c)"
+
 echo "${delimiter}"
 echo 'The script will use these settings: '
 echo -n 'solutionnameparameter: '
@@ -59,6 +64,8 @@ echo -n 'solutionname: '
 echo "${solutionname}"
 echo -n 'slndir: '
 echo "${slndir}"
+echo -n 'slndirsubdirs: '
+echo "${slndirsubdirs}"
 
 # check dependencies
 # NET Core SDK 
@@ -114,9 +121,10 @@ else
   exit 1
 fi
 
-# setup MonoGame solution and project(s)
+# setup MonoGame solution and / or project(s)
 echo "${delimiter}"
-echo 'Setting up solution and project(s) now...'
+echo 'Setting up solution and / or project(s) now...'
+workingdir="$(pwd)"
 cd "$slndir"
 # create solution file
 echo "create solution file"
@@ -145,6 +153,38 @@ awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.OpenGL/Program.cs`
 openglprogramfile="${solutionname}.${opengl}/Program.cs"
 sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${openglprogramfile}
+
+# information
+# cd ${workinddir}
+#echo "switching back to $SCRIPTPATH"
+#cd $SCRIPTPATH
+echo "PWD before is"
+pwd
+cd $(printf "%0.0s../" $(seq 1 $((slndirsubdirs+1)) ))
+echo "PWD after is"
+pwd
+#
+findmaxdepth="3"
+findmaxdepthcalc=$((findmaxdepth+slndirsubdirs))
+findpath="${slndir}"
+echo "findpath is ${findpath}"
+echo "findmaxdepthcalc is $findmaxdepthcalc"
+echo "pwd is" 
+pwd
+files="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type f)"
+filescount="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type f | wc -l)"
+dirs="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type d)"
+dirscount="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type d | wc -l)"
+#
+echo "${delimiter}"
+echo "Printing information about generated dir(s) / file(s)"
+echo "using maxdepth value of ${findmaxdepth} (${findmaxdepthcalc}):"
+echo "${delimiter}"
+echo "Created these ${dirscount} dir(s):"
+echo "${dirs}" 
+echo "${delimiter}"
+echo "Created these ${filescount} file(s):"
+echo "${files}"
 
 # dotnet run info
 echo "${delimiter}"
