@@ -17,8 +17,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=n:dsvaoiuxw
-LONGOPTS=name:,debug,solution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
+OPTIONS=hn:dsvaoiuxw
+LONGOPTS=help,name:,debug,solution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
@@ -34,6 +34,7 @@ fi
 eval set -- "$PARSED"
 
 # set defaults
+h=n
 n=monogamekickstarter
 #
 d=y
@@ -47,10 +48,13 @@ u=n
 x=n
 w=n
 
-
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
+        -h|--help)
+            h=y
+            shift
+            ;;    
         -n|--name)
             name="$2"
             shift 2
@@ -102,6 +106,17 @@ while true; do
     esac
 done
 
+# if we do not have a name as option argument we check 
+# check that we do not have more than one non-option argument
+if [ -z ${name+x} ]; then
+if [[ $# -gt 1 ]]; then
+    echo "More than one non-option argument found."
+    echo "Please use no non-option argument to use the default value or"
+    echo "pass only one non-option argument which will be used as name."
+    exit 4
+fi
+fi
+
 # handle non-option arguments
 #if [[ $# -ne 1 ]]; then
 #    echo "$0: A single input file is required."
@@ -109,18 +124,39 @@ done
 #fi
 
 if [ $d == y ]; then
-echo "name: $n"
+echo "help: $h [$help]"
+echo "name: $n [$name]"
 #
-echo "debug: $d"
-echo "solution: $s"
-echo "verbose: $v"
+echo "debug: $d [$debug]"
+echo "solution: $s [$solution]"
+echo "verbose: $v [$verbose]"
 #
-echo "mgandroid: $a"
-echo "mgdesktopgl: $o"
-echo "mgios: $i"
-echo "mguwpcore: $u"
-echo "mguwpxaml: $x"
-echo "mgwindowsdx: $w"
+echo "mgandroid: $a [$mgandroid]"
+echo "mgdesktopgl: $o [$mgdesktopgl]"
+echo "mgios: $i [$mgios]"
+echo "mguwpcore: $u [$mguwpcore]"
+echo "mguwpxaml: $x [$mguwpxaml]"
+echo "mgwindowsdx: $w [$mgwindowsdx]"
+#
+echo "projects to generate: "
+if [ $a == y ]; then
+echo "android"
+fi
+if [ $o == y ]; then
+echo "desktopgl"
+fi
+if [ $i == y ]; then
+echo "ios"
+fi
+if [ $u == y ]; then
+echo "uwpcore"
+fi
+if [ $x == y ]; then
+echo "uwpxaml"
+fi
+if [ $w == y ]; then
+echo "windowsdx"
+fi
 fi
 
 ################################################################################
@@ -129,7 +165,13 @@ fi
 
 # constants
 delimiter="################################################################################"
-opengl="OpenGL"
+#
+android="Android"
+desktopgl="OpenGL"
+ios="iOS"
+uwpcore="UWPCore"
+uwpxaml="UWPXaml"
+windowsdx="WindowsDX"
 
 # variables
 # outputdir="k1/j2/g3"
@@ -239,9 +281,9 @@ if [ -z "$(ls -A "${slndir}" 2> /dev/null)" ]; then
 else
   echo "Directory ${slndir} is NOT empty. Please restart the script with other start parameter(s)."
   echo 'If you already created a solution and project(s) in this directory with this script and the same parameter(s)'
-  echo "dotnet run --project "${slndir}/${solutionname}.${opengl}/${solutionname}.${opengl}.csproj""
+  echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
   echo 'or just'
-  echo "dotnet run --project "${slndir}/${solutionname}.${opengl}""
+  echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
   echo 'should build and run the project(s).'
   exit 1
 fi
@@ -260,23 +302,23 @@ dotnet new mgnetstandard -n "${solutionname}.NetStandardLibrary"
 dotnet sln add "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
 # create MonoGame Cross-Platform Desktop Application (OpenGL) project
 echo "create MonoGame Cross-Platform Desktop Application (OpenGL) project"
-dotnet new mgdesktopgl -n "${solutionname}.${opengl}"
-dotnet sln add "${solutionname}.${opengl}/${solutionname}.${opengl}.csproj"
+dotnet new mgdesktopgl -n "${solutionname}.${desktopgl}"
+dotnet sln add "${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
 # add references to the MonoGame NetStandard Library to all platform projects
 echo "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${opengl}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+dotnet add "${solutionname}.${desktopgl}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
 echo "delete files from projects which exist in the net standard library project and will be used from there"
-rm -r "${solutionname}.${opengl}/Content"
-rm "${solutionname}.${opengl}/Game1.cs"
+rm -r "${solutionname}.${desktopgl}/Content"
+rm "${solutionname}.${desktopgl}/Game1.cs"
 # change the link in all platform *.csproj project files so that it points to the content of the net standard library project
 # --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.OpenGL/MonoGameKickstarter.OpenGL.csproj`
-openglcontentfile="${solutionname}.${opengl}/${solutionname}.${opengl}.csproj"
+openglcontentfile="${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
 awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${openglcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.OpenGL/Program.cs`
-openglprogramfile="${solutionname}.${opengl}/Program.cs"
+openglprogramfile="${solutionname}.${desktopgl}/Program.cs"
 sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${openglprogramfile}
 
 # information
@@ -316,9 +358,9 @@ echo "${delimiter}"
 echo 'You should now be able to build and run the project(s) with'
 echo 'the command `dotnet run` from the project folder(s) or by passing the project.csproj file or'
 echo 'the project path as argument e.g.' 
-echo "dotnet run --project "${slndir}/${solutionname}.${opengl}/${solutionname}.${opengl}.csproj""
+echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
 echo 'or just'
-echo "dotnet run --project "${slndir}/${solutionname}.${opengl}""
+echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
 
 # finished
 echo "${delimiter}"
