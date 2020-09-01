@@ -288,7 +288,10 @@ else
   exit 1
 fi
 
-# setup MonoGame solution and / or project(s)
+################################################################################
+# SETUP MONOGAME SOLUTION AND / OR PROJECT(S)
+################################################################################
+
 echo "${delimiter}"
 echo 'Setting up solution and / or project(s) now...'
 workingdir="$(pwd)"
@@ -321,7 +324,10 @@ awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK
 openglprogramfile="${solutionname}.${desktopgl}/Program.cs"
 sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${openglprogramfile}
 
-# information
+################################################################################
+# PRINT INFORMATION
+################################################################################
+
 # cd ${workinddir}
 #echo "switching back to $SCRIPTPATH"
 #cd $SCRIPTPATH
