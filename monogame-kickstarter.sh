@@ -38,7 +38,7 @@ h=n
 n=monogamekickstarter
 #
 d=y
-s=y
+s=n
 v=y
 #
 a=n
@@ -137,6 +137,13 @@ echo "mgios: $i [$mgios]"
 echo "mguwpcore: $u [$mguwpcore]"
 echo "mguwpxaml: $x [$mguwpxaml]"
 echo "mgwindowsdx: $w [$mgwindowsdx]"
+#
+echo "solution: "
+if [ $s == y ]; then
+echo "create solution"
+else
+echo "don't create solution"
+fi
 #
 echo "projects to generate: "
 if [ $a == y ]; then
@@ -296,17 +303,18 @@ echo "${delimiter}"
 echo 'Setting up solution and / or project(s) now...'
 workingdir="$(pwd)"
 cd "$slndir"
-# create solution file
-echo "create solution file"
-dotnet new sln -n "${solutionname}"
+
 # create MonoGame NetStandard Library project for code / content sharing
 echo "create MonoGame NetStandard Library project for code / content sharing"
 dotnet new mgnetstandard -n "${solutionname}.NetStandardLibrary"
-dotnet sln add "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+
+################################################################################
+
+if [ $o == y ]; then
 # create MonoGame Cross-Platform Desktop Application (OpenGL) project
 echo "create MonoGame Cross-Platform Desktop Application (OpenGL) project"
 dotnet new mgdesktopgl -n "${solutionname}.${desktopgl}"
-dotnet sln add "${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
+
 # add references to the MonoGame NetStandard Library to all platform projects
 echo "add references to the net standard library to all platform projects"
 dotnet add "${solutionname}.${desktopgl}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
@@ -323,6 +331,51 @@ awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.OpenGL/Program.cs`
 openglprogramfile="${solutionname}.${desktopgl}/Program.cs"
 sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${openglprogramfile}
+fi
+
+################################################################################
+
+if [ $w == y ]; then
+# create MonoGame Windows Desktop Application (Windows DirectX) project
+echo "create MonoGame Windows Desktop Application (Windows DirectX) project"
+dotnet new mgwindowsdx -n "${solutionname}.${windowsdx}"
+
+# add references to the MonoGame NetStandard Library to all platform projects
+echo "add references to the net standard library to all platform projects"
+dotnet add "${solutionname}.${mgwindowsdx}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+echo $delimiter
+# delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
+echo "delete files from projects which exist in the net standard library project and will be used from there"
+rm -r "${solutionname}.${mgwindowsdx}/Content"
+rm "${solutionname}.${mgwindowsdx}/Game1.cs"
+# change the link in all platform *.csproj project files so that it points to the content of the net standard library project
+# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
+windowsdxcontentfile="${solutionname}.${mgwindowsdx}/${solutionname}.${mgwindowsdx}.csproj"
+awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${windowsdxcontentfile}
+# add using directives to the file `Program.cs` of all platform projects
+# --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
+windowsdxprogramfile="${solutionname}.${mgwindowsdx}/Program.cs"
+sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${windowsdxprogramfile}
+fi
+
+################################################################################
+
+if [ $s == y ]; then
+# create solution file
+echo "create solution file"
+dotnet new sln -n "${solutionname}"
+#
+dotnet sln add "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+#
+if [ $o == y ]; then
+dotnet sln add "${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
+fi
+#
+if [ $w == y ]; then
+dotnet sln add "${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
+fi
+#
+fi
 
 ################################################################################
 # PRINT INFORMATION
