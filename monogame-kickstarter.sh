@@ -17,8 +17,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=hn:dsvaoiuxw
-LONGOPTS=help,name:,debug,solution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
+OPTIONS=hn:dsSvaoiuxw
+LONGOPTS=help,name:,debug,solution,nosolution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
@@ -38,15 +38,20 @@ h=n
 n=monogamekickstarter
 #
 d=y
-s=n
+s=y
+S=n
 v=y
 #
 a=n
-o=y
+o=n
 i=n
 u=n
 x=n
 w=n
+#
+numprojects=0
+#
+numsolutionargs=0
 
 # now enjoy the options in order and nicely split until we see --
 while true; do
@@ -64,7 +69,13 @@ while true; do
             shift
             ;;
         -s|--solution)
+            numsolutionargs=$((numsolutionargs+1))
             s=y
+            shift
+            ;;
+        -S|--nosolution)
+            numsolutionargs=$((numsolutionargs+1))
+            S=y
             shift
             ;;
         -v|--verbose)
@@ -129,6 +140,7 @@ echo "name: $n [$name]"
 #
 echo "debug: $d [$debug]"
 echo "solution: $s [$solution]"
+echo "nosolution: $S [$nosolution]"
 echo "verbose: $v [$verbose]"
 #
 echo "mgandroid: $a [$mgandroid]"
@@ -145,26 +157,66 @@ else
 echo "don't create solution"
 fi
 #
+echo "nosolution: "
+if [ $S == y ]; then
+echo "don't create solution"
+else
+echo "create solution"
+fi
+#
+if [ $numsolutionargs -gt 1 ] ; then
+echo "Error: conflicting arguments -s / --solution and -S / --nosolution"
+echo "Please define either -s / --solution or -S / --nosolution"
+exit 5
+fi
+#
+# We know that we only have one of the arguments of -s and -S so if we found 
+# -S we set -s to n to deactivate the creation of the sln file which only
+# happens if the value of -s is set to y
+if [ $S == y ] ; then
+s=n
+fi
+#
 echo "projects to generate: "
 if [ $a == y ]; then
+numprojects=$((numprojects+1))
 echo "android"
 fi
 if [ $o == y ]; then
+numprojects=$((numprojects+1))
 echo "desktopgl"
 fi
 if [ $i == y ]; then
+numprojects=$((numprojects+1))
 echo "ios"
 fi
 if [ $u == y ]; then
+numprojects=$((numprojects+1))
 echo "uwpcore"
 fi
 if [ $x == y ]; then
+numprojects=$((numprojects+1))
 echo "uwpxaml"
 fi
 if [ $w == y ]; then
+numprojects=$((numprojects+1))
 echo "windowsdx"
 fi
 fi
+#
+echo "number of projects to generate: ${numprojects}"
+#
+if [ ! ${numprojects} -gt 0 ] ; then
+echo "Error: No project(s) to generate. Please define at least one project"
+echo "to be generated e.g. to generate projects using the"
+echo "mgdesktopgl (-o or --mgdesktopgl) and"
+echo "mgwindowsdx (-w or --mgwindowsdx) templates use"
+echo "monogame-kickstarter -ow"
+echo "or using the long options"
+echo "monogame-kickstarter --mgdesktopgl --mgwindowsdx"
+exit 6
+fi
+#
 
 ################################################################################
 # COMMAND LINE OPTIONS
@@ -416,10 +468,15 @@ echo "${files}"
 echo "${delimiter}"
 echo 'You should now be able to build and run the project(s) with'
 echo 'the command `dotnet run` from the project folder(s) or by passing the project.csproj file or'
-echo 'the project path as argument e.g.' 
+echo 'the project path as argument e.g.'
+if [ $o == y ]; then
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
-echo 'or just'
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
+fi
+if [ $w == y ]; then
+echo "dotnet run --project "${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj""
+echo "dotnet run --project "${slndir}/${solutionname}.${windowsdx}""
+fi
 
 # finished
 echo "${delimiter}"
