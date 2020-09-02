@@ -394,19 +394,19 @@ dotnet new mgwindowsdx -n "${solutionname}.${windowsdx}"
 
 # add references to the MonoGame NetStandard Library to all platform projects
 echo "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${mgwindowsdx}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+dotnet add "${solutionname}.${windowsdx}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
 echo "delete files from projects which exist in the net standard library project and will be used from there"
-rm -r "${solutionname}.${mgwindowsdx}/Content"
-rm "${solutionname}.${mgwindowsdx}/Game1.cs"
+rm -r "${solutionname}.${windowsdx}/Content"
+rm "${solutionname}.${windowsdx}/Game1.cs"
 # change the link in all platform *.csproj project files so that it points to the content of the net standard library project
 # --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
-windowsdxcontentfile="${solutionname}.${mgwindowsdx}/${solutionname}.${mgwindowsdx}.csproj"
+windowsdxcontentfile="${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
 awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${windowsdxcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
-windowsdxprogramfile="${solutionname}.${mgwindowsdx}/Program.cs"
+windowsdxprogramfile="${solutionname}.${windowsdx}/Program.cs"
 sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${windowsdxprogramfile}
 fi
 
