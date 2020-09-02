@@ -211,9 +211,9 @@ echo "Error: No project(s) to generate. Please define at least one project"
 echo "to be generated e.g. to generate projects using the"
 echo "mgdesktopgl (-o or --mgdesktopgl) and"
 echo "mgwindowsdx (-w or --mgwindowsdx) templates use"
-echo "monogame-kickstarter -ow"
+echo "monogame-kickstarter -ow solutionname"
 echo "or using the long options"
-echo "monogame-kickstarter --mgdesktopgl --mgwindowsdx"
+echo "monogame-kickstarter --mgdesktopgl --mgwindowsdx solutionname"
 exit 6
 fi
 #
