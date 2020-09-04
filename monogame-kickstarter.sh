@@ -42,7 +42,7 @@ s=y
 S=n
 v=y
 #
-a=n
+a=y
 o=n
 i=n
 u=n
@@ -361,6 +361,7 @@ echo "create MonoGame NetStandard Library project for code / content sharing"
 dotnet new mgnetstandard -n "${solutionname}.NetStandardLibrary"
 
 ################################################################################
+# DESKTOP GL
 
 if [ $o == y ]; then
 # create MonoGame Cross-Platform Desktop Application (OpenGL) project
@@ -386,6 +387,7 @@ sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${openglprogramfile}
 fi
 
 ################################################################################
+# WINDOWS DX
 
 if [ $w == y ]; then
 # create MonoGame Windows Desktop Application (Windows DirectX) project
@@ -411,6 +413,32 @@ sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${windowsdxprogramfile}
 fi
 
 ################################################################################
+# ANDROID
+
+if [ $a == y ]; then
+# create MonoGame Android Application project
+echo "create MonoGame Android Application project"
+dotnet new mgandroid -n "${solutionname}.${android}"
+
+# add references to the MonoGame NetStandard Library to all platform projects
+echo "add references to the net standard library to all platform projects"
+dotnet add "${solutionname}.${android}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+echo $delimiter
+# delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
+echo "delete files from projects which exist in the net standard library project and will be used from there"
+rm -r "${solutionname}.${android}/Content"
+rm "${solutionname}.${android}/Game1.cs"
+# change the link in all platform *.csproj project files so that it points to the content of the net standard library project
+# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
+androidcontentfile="${solutionname}.${android}/${solutionname}.${android}.csproj"
+awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
+# add using directives to the file `Program.cs` of all platform projects
+# --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
+androidprogramfile="${solutionname}.${android}/Program.cs"
+sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${androidprogramfile}
+fi
+
+################################################################################
 
 if [ $s == y ]; then
 # create solution file
@@ -418,6 +446,10 @@ echo "create solution file"
 dotnet new sln -n "${solutionname}"
 #
 dotnet sln add "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+#
+if [ $a == y ]; then
+dotnet sln add "${solutionname}.${android}/${solutionname}.${android}.csproj"
+fi
 #
 if [ $o == y ]; then
 dotnet sln add "${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
