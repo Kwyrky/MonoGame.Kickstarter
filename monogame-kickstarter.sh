@@ -91,10 +91,12 @@ w=n
 mgwindowsdx="$w"
 
 
-# initial values
+# initial values of variables to keep track of some things
 numprojects=0
 #
 numsolutionargs=0
+#
+nameparameterset=n
 
 # now enjoy the options in order and nicely split until we see --
 while true; do
@@ -112,6 +114,7 @@ while true; do
         -n|--name)
             n="$2"
             name="$2"
+            nameparameterset=y
             shift 2
             ;;    
         -d|--debug)
@@ -278,10 +281,6 @@ fi
 #
 
 ################################################################################
-# COMMAND LINE OPTIONS
-################################################################################
-
-################################################################################
 # FUNCTIONS
 ################################################################################
 
@@ -300,7 +299,11 @@ fi
 }
 
 # parameters
+if [ $nameparameterset == y ]; then
+solutionnameparameter="$n"
+else
 solutionnameparameter="$1"
+fi
 
 ###########################################################################
 SCRIPTPATH="$0"
