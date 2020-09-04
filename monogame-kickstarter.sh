@@ -75,7 +75,7 @@ verbose="$v"
 a=n
 mgandroid="$a"
 #
-o=n
+o=y
 mgdesktopgl="$o"
 #
 i=n
