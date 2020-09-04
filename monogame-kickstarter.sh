@@ -266,6 +266,7 @@ echo "windowsdx"
 fi
 fi
 #
+echo "${delimiter}"
 echo "number of projects to generate: ${numprojects}"
 #
 if [ ! ${numprojects} -gt 0 ] ; then
