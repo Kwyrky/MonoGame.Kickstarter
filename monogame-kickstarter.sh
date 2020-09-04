@@ -501,6 +501,10 @@ echo "${delimiter}"
 echo 'You should now be able to build and run the project(s) with'
 echo 'the command `dotnet run` from the project folder(s) or by passing the project.csproj file or'
 echo 'the project path as argument e.g.'
+if [ $a == y ]; then
+echo "dotnet run --project "${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj""
+echo "dotnet run --project "${slndir}/${solutionname}.${android}""
+fi
 if [ $o == y ]; then
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
