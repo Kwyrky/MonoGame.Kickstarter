@@ -495,7 +495,13 @@ dotnet add "${solutionname}.${android}" reference "${solutionname}.NetStandardLi
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
 echo "delete files from projects which exist in the net standard library project and will be used from there"
-rm -r "${solutionname}.${android}/Content"
+
+# For ANDROID we leave the original Content folder provided by the Android template where it is 
+# because maybe for an app you want to add modified content in some way at some point
+# We just add the content from the net standard project so that it is available in the shared code
+# and we get a working App from the start.
+### rm -r "${solutionname}.${android}/Content"
+
 rm "${solutionname}.${android}/Game1.cs"
 # change the link in all platform *.csproj project files so that it points to the content of the net standard library project
 # --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
@@ -503,8 +509,8 @@ androidcontentfile="${solutionname}.${android}/${solutionname}.${android}.csproj
 awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
-androidprogramfile="${solutionname}.${android}/Program.cs"
-sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${androidprogramfile}
+androidactivityfile="${solutionname}.${android}/Activity1.cs"
+sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${androidactivityfile}
 fi
 
 ################################################################################
