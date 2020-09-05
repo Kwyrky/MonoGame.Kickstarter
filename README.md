@@ -3,11 +3,23 @@
 
 A bash script that sets up a MonoGame solution ready for cross-platform development.
 
-## Usage
+## Quickstart
 
 `monogame-kickstarter.sh [solutionname]`
 
 This is all you need to do and MonoGame Kickstarter will create a solution with a MonoGame .NET Standard Library project and an OpenGL project referencing it. The OpenGL project will use code and content from the MonoGame .NET Standard Library project. Just open `Game1.cs` from the MonoGame .NET Standard Library project and you can immediately start developing your MonoGame project.
+
+## Parameters
+
+All parameters must come before the optional non-option parameter for the solutionname / foldername.
+
+At this point you can make use of the parameter to generate an OpenGL project (`-o` or `--mgdesktopgl`) and / or a Windows DirectX project (`-w` or `--mgwindowsdx`).
+
+For example the command
+
+`monogame-kickstarter.sh -ow [solutionname]`
+
+will generate both projects and use [solutionname] as root folder name and solutionname.
 
 ## Support
 
@@ -17,7 +29,16 @@ https://ko-fi.com/kwyrky
 
 ## Works with Linux and Windows
 
-A quick test revealed that the script can also be used with Windows in git bash!
+A quick test revealed that the script can also be used with Windows in git bash! 
+
+You can run the script in git bash and pass either `-w` or `--mgwindowsdx` as parameter to make it generate a Windows DirectX project.
+
+`monogame-kickstarter.sh -w [solutionname]`
+`monogame-kickstarter.sh --mgwindowsdx [solutionname]`
+
+If you are using the script mainly on windows and you do want to only generate the Windows DirectX project you can modify and change the default value in the script from generating the OpenGL project `o=y` to `o=n` and turn on the Windows DirectX project by changing `w=n` to `w=y`.
+
+If the default values for both options are turned off you can enable them each time you run the script by passing the corresponding options `-o` or `--mgdesktopgl` and `-w` or `--mgwindowsdx`.
 
 ## Demo Linux
 
@@ -29,7 +50,7 @@ https://youtu.be/qgvVs06UvW8
 
 ## Additional Info
 
-The parameter `[solutionname]` is optional. If the script is started without a parameter it will use the default value which is set to "MonoGameKickstarter". If you want to make the parameter mandatory you can achieve this by editing the script and setting the variable holding the default value to an empty string e.g. `solutionname=""`. You can also define a parent folder structure where the solution folder will be put in e.g. `outputdir="monogame-kickstarter"`. The script will then create the outputdir first and put everything inside it.
+The parameter `[solutionname]` is optional. If the script is started without a parameter it will use the default value which is set to "MonoGameKickstarter". If you want to make the parameter mandatory you can achieve this by editing the script and setting the variable holding the default value to an empty string e.g. `solutionname=""`. You can also define a parent folder structure where the solution folder will be put in e.g. `outputdir="monogame-kickstarter"`. The script will then create the outputdir(s) first and put everything inside it.
 
 ## Dependencies
 

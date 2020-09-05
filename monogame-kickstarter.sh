@@ -1,6 +1,23 @@
 #! /bin/bash
 
-version="1.01"
+version="1.02"
+
+scriptname="monogame-kickstarter.sh"
+
+# constants
+delimiter="################################################################################"
+#
+android="Android"
+desktopgl="OpenGL"
+ios="iOS"
+uwpcore="UWPCore"
+uwpxaml="UWPXaml"
+windowsdx="WindowsDX"
+
+# variables
+# outputdir="k1/j2/g3"
+outputdir=""
+solutionname="MonoGameKickstarter"
 
 ################################################################################
 # COMMAND LINE OPTIONS
@@ -17,8 +34,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=hn:dsSvaoiuxw
-LONGOPTS=help,name:,debug,solution,nosolution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
+OPTIONS=hrn:dsSvaoiuxw
+LONGOPTS=help,rocket,name:,debug,solution,nosolution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
@@ -35,75 +52,121 @@ eval set -- "$PARSED"
 
 # set defaults
 h=n
+help="$h"
+#
+r=n
+rocket="$r"
+#
 n=monogamekickstarter
+name="$n"
 #
 d=y
+debug="$d"
+#
 s=y
+solution="$s"
+#
 S=n
-v=y
+nosolution="$S"
 #
-a=y
-o=n
+v=n
+verbose="$v"
+#
+a=n
+mgandroid="$a"
+#
+o=y
+mgdesktopgl="$o"
+#
 i=n
-u=n
-x=n
-w=n
+mgios="$i"
 #
+u=n
+mguwpcore="$u"
+#
+x=n
+mguwpxaml="$x"
+#
+w=n
+mgwindowsdx="$w"
+
+
+# initial values of variables to keep track of some things
 numprojects=0
 #
 numsolutionargs=0
+#
+nameparameterset=n
 
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
         -h|--help)
             h=y
+            help="$h"
             shift
-            ;;    
+            ;;   
+        -r|--rocket)
+            r=y
+            rocket="$r"
+            shift
+            ;;                
         -n|--name)
+            n="$2"
             name="$2"
+            nameparameterset=y
             shift 2
             ;;    
         -d|--debug)
             d=y
+            debug="$d"
             shift
             ;;
         -s|--solution)
             numsolutionargs=$((numsolutionargs+1))
             s=y
+            solution="$s"
             shift
             ;;
         -S|--nosolution)
             numsolutionargs=$((numsolutionargs+1))
             S=y
+            nosolution="$S"
             shift
             ;;
         -v|--verbose)
             v=y
+            verbose="$v"
             shift
             ;;
         -a|--mgandroid)
             a=y
+            mgandroid="$a"
             shift
             ;;
         -o|--mgdesktopgl)
             o=y
+            mgdesktopgl="$o"
             shift
             ;;
         -i|--mgios)
             i=y
+            mgios="$i"
             shift
             ;;
         -u|--mguwpcore)
             u=y
+            mguwpcore="$u"
             shift
             ;;
         -x|--mguwpxaml)
             x=y
+            mguwpxaml="$x"
             shift
             ;;
         -w|--mgwindowsdx)
             w=y
+            mgwindowsdx="$w"
             shift
             ;;                                                
         --)
@@ -118,7 +181,7 @@ while true; do
 done
 
 # if we do not have a name as option argument we check 
-# check that we do not have more than one non-option argument
+# that we do not have more than one non-option argument
 if [ -z ${name+x} ]; then
 if [[ $# -gt 1 ]]; then
     echo "More than one non-option argument found."
@@ -128,14 +191,9 @@ if [[ $# -gt 1 ]]; then
 fi
 fi
 
-# handle non-option arguments
-#if [[ $# -ne 1 ]]; then
-#    echo "$0: A single input file is required."
-#    exit 4
-#fi
-
 if [ $d == y ]; then
 echo "help: $h [$help]"
+echo "rocket: $r [$rocket]"
 echo "name: $n [$name]"
 #
 echo "debug: $d [$debug]"
@@ -150,24 +208,25 @@ echo "mguwpcore: $u [$mguwpcore]"
 echo "mguwpxaml: $x [$mguwpxaml]"
 echo "mgwindowsdx: $w [$mgwindowsdx]"
 #
-echo "solution: "
+echo "${delimiter}"
+echo -n "solution: "
 if [ $s == y ]; then
-echo "create solution"
+  echo "create solution"
 else
-echo "don't create solution"
+  echo "don't create solution"
 fi
 #
-echo "nosolution: "
+echo -n "nosolution: "
 if [ $S == y ]; then
-echo "don't create solution"
+  echo "don't create solution"
 else
-echo "create solution"
+  echo "create solution"
 fi
 #
 if [ $numsolutionargs -gt 1 ] ; then
-echo "Error: conflicting arguments -s / --solution and -S / --nosolution"
-echo "Please define either -s / --solution or -S / --nosolution"
-exit 5
+  echo "Error: conflicting arguments -s / --solution and -S / --nosolution"
+  echo "Please define either -s / --solution or -S / --nosolution"
+  exit 5
 fi
 #
 # We know that we only have one of the arguments of -s and -S so if we found 
@@ -175,13 +234,16 @@ fi
 # happens if the value of -s is set to y
 if [ $S == y ] ; then
 s=n
+solution="$s"
 fi
 #
+echo "${delimiter}"
 echo "projects to generate: "
 if [ $a == y ]; then
 numprojects=$((numprojects+1))
 echo "android"
 fi
+#
 if [ $o == y ]; then
 numprojects=$((numprojects+1))
 echo "desktopgl"
@@ -204,6 +266,7 @@ echo "windowsdx"
 fi
 fi
 #
+echo "${delimiter}"
 echo "number of projects to generate: ${numprojects}"
 #
 if [ ! ${numprojects} -gt 0 ] ; then
@@ -211,40 +274,47 @@ echo "Error: No project(s) to generate. Please define at least one project"
 echo "to be generated e.g. to generate projects using the"
 echo "mgdesktopgl (-o or --mgdesktopgl) and"
 echo "mgwindowsdx (-w or --mgwindowsdx) templates use"
-echo "monogame-kickstarter -ow solutionname"
+echo "${scriptname} -ow solutionname"
 echo "or using the long options"
-echo "monogame-kickstarter --mgdesktopgl --mgwindowsdx solutionname"
+echo "${scriptname} --mgdesktopgl --mgwindowsdx solutionname"
 exit 6
 fi
 #
 
 ################################################################################
-# COMMAND LINE OPTIONS
+# FUNCTIONS
 ################################################################################
 
-# constants
-delimiter="################################################################################"
-#
-android="Android"
-desktopgl="OpenGL"
-ios="iOS"
-uwpcore="UWPCore"
-uwpxaml="UWPXaml"
-windowsdx="WindowsDX"
+function echoverbose()
+{
+if [ $v == y ]; then
+echo "$1"
+fi
+}
 
-# variables
-# outputdir="k1/j2/g3"
-outputdir=""
-solutionname="MonoGameKickstarter"
+function echodebug()
+{
+if [ $d == y ]; then
+echo "$1"
+fi
+}
 
 # parameters
+if [ $nameparameterset == y ]; then
+solutionnameparameter="$n"
+else
 solutionnameparameter="$1"
+fi
 
 ###########################################################################
 SCRIPTPATH="$0"
 REALPATH="$(realpath "$SCRIPTPATH")"
 BASEPATH="$(dirname "$REALPATH")"
+if [ $r == y ]; then
 cat "$BASEPATH/MonoGameKickstarterLogoWhite.txt"
+else
+echo "${delimiter}"
+fi
 ###########################################################################
 
 echo "${delimiter}"
@@ -297,7 +367,7 @@ echo "${slndirsubdirs}"
 # NET Core SDK 
 echo "${delimiter}"
 if ! [ -x "$(command -v dotnet)" ]; then
-  echo 'Error: This script uses dotnet. But it is not installed or executable.'
+  echo 'Error: This script uses dotnet. But it is not installed or not executable.'
   exit 1
 else
   dotnetversion="$(dotnet --version)"
@@ -329,7 +399,7 @@ else
   echo "Creating directory "${slndir}" now."
   mkdir -p "${slndir}"
   if [ $? -ne 0 ] ; then
-    echo 'Could not create directory for some reason.'
+    echo 'Could not create directory.'
     exit 1
   fi
 fi
@@ -339,11 +409,10 @@ if [ -z "$(ls -A "${slndir}" 2> /dev/null)" ]; then
   echo "Directory ${slndir} is empty."
 else
   echo "Directory ${slndir} is NOT empty. Please restart the script with other start parameter(s)."
-  echo 'If you already created a solution and project(s) in this directory with this script and the same parameter(s)'
+  echo "If you already created a solution and project(s) in this directory with this script and the same parameter(s)"
   echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
-  echo 'or just'
   echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
-  echo 'should build and run the project(s).'
+  echo "should build and run the project(s)."
   exit 1
 fi
 
@@ -352,12 +421,12 @@ fi
 ################################################################################
 
 echo "${delimiter}"
-echo 'Setting up solution and / or project(s) now...'
+echoverbose 'Setting up solution and / or project(s) now...'
 workingdir="$(pwd)"
 cd "$slndir"
 
 # create MonoGame NetStandard Library project for code / content sharing
-echo "create MonoGame NetStandard Library project for code / content sharing"
+echoverbose "create MonoGame NetStandard Library project for code / content sharing"
 dotnet new mgnetstandard -n "${solutionname}.NetStandardLibrary"
 
 ################################################################################
@@ -365,15 +434,15 @@ dotnet new mgnetstandard -n "${solutionname}.NetStandardLibrary"
 
 if [ $o == y ]; then
 # create MonoGame Cross-Platform Desktop Application (OpenGL) project
-echo "create MonoGame Cross-Platform Desktop Application (OpenGL) project"
+echoverbose "create MonoGame Cross-Platform Desktop Application (OpenGL) project"
 dotnet new mgdesktopgl -n "${solutionname}.${desktopgl}"
 
 # add references to the MonoGame NetStandard Library to all platform projects
-echo "add references to the net standard library to all platform projects"
+echoverbose "add references to the net standard library to all platform projects"
 dotnet add "${solutionname}.${desktopgl}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
-echo "delete files from projects which exist in the net standard library project and will be used from there"
+echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
 rm -r "${solutionname}.${desktopgl}/Content"
 rm "${solutionname}.${desktopgl}/Game1.cs"
 # change the link in all platform *.csproj project files so that it points to the content of the net standard library project
@@ -391,15 +460,15 @@ fi
 
 if [ $w == y ]; then
 # create MonoGame Windows Desktop Application (Windows DirectX) project
-echo "create MonoGame Windows Desktop Application (Windows DirectX) project"
+echoverbose "create MonoGame Windows Desktop Application (Windows DirectX) project"
 dotnet new mgwindowsdx -n "${solutionname}.${windowsdx}"
 
 # add references to the MonoGame NetStandard Library to all platform projects
-echo "add references to the net standard library to all platform projects"
+echoverbose "add references to the net standard library to all platform projects"
 dotnet add "${solutionname}.${windowsdx}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
-echo "delete files from projects which exist in the net standard library project and will be used from there"
+echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
 rm -r "${solutionname}.${windowsdx}/Content"
 rm "${solutionname}.${windowsdx}/Game1.cs"
 # change the link in all platform *.csproj project files so that it points to the content of the net standard library project
@@ -442,20 +511,24 @@ fi
 
 if [ $s == y ]; then
 # create solution file
-echo "create solution file"
+echoverbose "create solution file"
 dotnet new sln -n "${solutionname}"
 #
+echoverbose "Adding NetStandardLibrary project to solution"
 dotnet sln add "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
 #
 if [ $a == y ]; then
+echoverbose "Adding android project to solution"
 dotnet sln add "${solutionname}.${android}/${solutionname}.${android}.csproj"
 fi
 #
 if [ $o == y ]; then
+echoverbose "Adding desktopgl project to solution"
 dotnet sln add "${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
 fi
 #
 if [ $w == y ]; then
+echoverbose "Adding windowsdx project to solution"
 dotnet sln add "${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
 fi
 #
@@ -465,30 +538,33 @@ fi
 # PRINT INFORMATION
 ################################################################################
 
-# cd ${workinddir}
-#echo "switching back to $SCRIPTPATH"
-#cd $SCRIPTPATH
-echo "PWD before is"
-pwd
-cd $(printf "%0.0s../" $(seq 1 $((slndirsubdirs+1)) ))
-echo "PWD after is"
-pwd
+if [ $d == y ]; then
+  # cd ${workinddir}
+  # echo "switching back to $SCRIPTPATH"
+  # cd $SCRIPTPATH
+  echo "PWD before is"
+  pwd
+  cd $(printf "%0.0s../" $(seq 1 $((slndirsubdirs+1)) ))
+  echo "PWD after is"
+  pwd
+  #
+  findmaxdepth="3"
+  findmaxdepthcalc=$((findmaxdepth+slndirsubdirs))
+  findpath="${slndir}"
+  echo "findpath is ${findpath}"
+  echo "findmaxdepthcalc is $findmaxdepthcalc"
+  echo "pwd is" 
+  pwd
+fi
 #
-findmaxdepth="3"
-findmaxdepthcalc=$((findmaxdepth+slndirsubdirs))
-findpath="${slndir}"
-echo "findpath is ${findpath}"
-echo "findmaxdepthcalc is $findmaxdepthcalc"
-echo "pwd is" 
-pwd
 files="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type f)"
 filescount="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type f | wc -l)"
 dirs="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type d)"
 dirscount="$(find ${findpath} -maxdepth ${findmaxdepthcalc} -type d | wc -l)"
 #
 echo "${delimiter}"
-echo "Printing information about generated dir(s) / file(s)"
-echo "using maxdepth value of ${findmaxdepth} (${findmaxdepthcalc}):"
+echoverbose "Printing information about generated dir(s) / file(s)"
+echodebug "using maxdepth value of ${findmaxdepth} (${findmaxdepthcalc}):"
 echo "${delimiter}"
 echo "Created these ${dirscount} dir(s):"
 echo "${dirs}" 
