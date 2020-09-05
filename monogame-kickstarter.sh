@@ -624,3 +624,8 @@ echo 'Everything done! :-)'
 # add reference to net standard
 # remove <android>.csproj line 57: <Compile Include="Game1.cs" />
 # change awk replace of content with add to have both the android content and shared content
+# copy mgks files to net standard project content
+#
+# add testcode lines
+### Effect effect = Content.Load<Effect>("effect");
+### GraphicsDevice.Clear(Color.Turquoise);
