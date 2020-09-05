@@ -34,8 +34,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=hrn:dsSvaoiuxw
-LONGOPTS=help,rocket,name:,debug,solution,nosolution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
+OPTIONS=hrcn:dsSvaoiuxw
+LONGOPTS=help,rocket,copy,name:,debug,solution,nosolution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
@@ -57,6 +57,9 @@ help="$h"
 r=n
 rocket="$r"
 #
+c=y
+copy="$c"
+#
 n=monogamekickstarter
 name="$n"
 #
@@ -72,7 +75,7 @@ nosolution="$S"
 v=n
 verbose="$v"
 #
-a=n
+a=y
 mgandroid="$a"
 #
 o=y
@@ -110,7 +113,12 @@ while true; do
             r=y
             rocket="$r"
             shift
-            ;;                
+            ;;   
+        -c|--copy)
+            c=y
+            copy="$c"
+            shift
+            ;;                            
         -n|--name)
             n="$2"
             name="$2"
@@ -194,6 +202,7 @@ fi
 if [ $d == y ]; then
 echo "help: $h [$help]"
 echo "rocket: $r [$rocket]"
+echo "copy: $c [$copy]"
 echo "name: $n [$name]"
 #
 echo "debug: $d [$debug]"
@@ -428,6 +437,7 @@ cd "$slndir"
 # create MonoGame NetStandard Library project for code / content sharing
 echoverbose "create MonoGame NetStandard Library project for code / content sharing"
 dotnet new mgnetstandard -n "${solutionname}.NetStandardLibrary"
+echo "${delimiter}"
 
 ################################################################################
 # DESKTOP GL
@@ -486,15 +496,15 @@ fi
 
 if [ $a == y ]; then
 # create MonoGame Android Application project
-echo "create MonoGame Android Application project"
+echoverbose "create MonoGame Android Application project"
 dotnet new mgandroid -n "${solutionname}.${android}"
 
 # add references to the MonoGame NetStandard Library to all platform projects
-echo "add references to the net standard library to all platform projects"
+echoverbose "add references to the net standard library to all platform projects"
 dotnet add "${solutionname}.${android}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
-echo "delete files from projects which exist in the net standard library project and will be used from there"
+echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
 
 # For ANDROID we leave the original Content folder provided by the Android template where it is 
 # because maybe for an app you want to add modified content in some way at some point
@@ -512,6 +522,14 @@ awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK
 androidactivityfile="${solutionname}.${android}/Activity1.cs"
 sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${androidactivityfile}
 fi
+
+################################################################################
+# copy sample files
+
+# if [ $c == y ]; then
+# dirnamesamplefiles="mgks"
+# Effect effect = Content.Load<Effect>("effect")
+# fi
 
 ################################################################################
 
@@ -545,6 +563,7 @@ fi
 ################################################################################
 
 if [ $d == y ]; then
+  echo "${delimiter}"
   # cd ${workinddir}
   # echo "switching back to $SCRIPTPATH"
   # cd $SCRIPTPATH
@@ -599,3 +618,9 @@ fi
 # finished
 echo "${delimiter}"
 echo 'Everything done! :-)'
+
+# TODO
+# add to sln
+# add reference to net standard
+# remove <android>.csproj line 57: <Compile Include="Game1.cs" />
+# change awk replace of content with add to have both the android content and shared content
