@@ -36,8 +36,8 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-OPTIONS=hrcn:dsSvaoiuxw
-LONGOPTS=help,rocket,copy,name:,debug,solution,nosolution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
+OPTIONS=hrcn:dzsSvaoiuxw
+LONGOPTS=help,rocket,copy,name:,debug,showcommands,solution,nosolution,verbose,mgandroid,mgdesktopgl,mgios,mguwpcore,mguwpxaml,mgwindowsdx
 
 # -regarding ! and PIPESTATUS see above
 # -temporarily store output to be able to check for errors
