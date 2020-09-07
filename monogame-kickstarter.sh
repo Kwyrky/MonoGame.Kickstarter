@@ -7,6 +7,8 @@ scriptname="monogame-kickstarter.sh"
 # constants
 delimiter="################################################################################"
 #
+netstandardlibrary="NetStandardLibrary"
+#
 android="Android"
 desktopgl="OpenGL"
 ios="iOS"
@@ -65,6 +67,9 @@ name="$n"
 #
 d=y
 debug="$d"
+#
+z=n
+showcommands="$z"
 #
 s=y
 solution="$s"
@@ -130,6 +135,11 @@ while true; do
             debug="$d"
             shift
             ;;
+        -z|--showcommands)
+            z=y
+            showcommands="$z"
+            shift
+            ;;            
         -s|--solution)
             numsolutionargs=$((numsolutionargs+1))
             s=y
@@ -436,11 +446,15 @@ cd "$slndir"
 
 # create MonoGame NetStandard Library project for code / content sharing
 echoverbose "create MonoGame NetStandard Library project for code / content sharing"
-dotnet new mgnetstandard -n "${solutionname}.NetStandardLibrary"
+dotnet new mgnetstandard -n "${solutionname}.${netstandardlibrary}"
 echo "${delimiter}"
 
 ################################################################################
 # DESKTOP GL
+
+if [ $z == y ]; then
+set -x
+fi
 
 if [ $o == y ]; then
 # create MonoGame Cross-Platform Desktop Application (OpenGL) project
@@ -449,7 +463,7 @@ dotnet new mgdesktopgl -n "${solutionname}.${desktopgl}"
 
 # add references to the MonoGame NetStandard Library to all platform projects
 echoverbose "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${desktopgl}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+dotnet add "${solutionname}.${desktopgl}" reference "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
 echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
@@ -462,8 +476,12 @@ awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.OpenGL/Program.cs`
 openglprogramfile="${solutionname}.${desktopgl}/Program.cs"
-sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${openglprogramfile}
+sed -i "2iusing ${solutionname}.${netstandardlibrary};" ${openglprogramfile}
 fi
+
+if [ $z == y ]; then
+set +x
+fi 
 
 ################################################################################
 # WINDOWS DX
@@ -475,7 +493,7 @@ dotnet new mgwindowsdx -n "${solutionname}.${windowsdx}"
 
 # add references to the MonoGame NetStandard Library to all platform projects
 echoverbose "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${windowsdx}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+dotnet add "${solutionname}.${windowsdx}" reference "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
 echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
@@ -488,11 +506,15 @@ awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
 windowsdxprogramfile="${solutionname}.${windowsdx}/Program.cs"
-sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${windowsdxprogramfile}
+sed -i "2iusing ${solutionname}.${netstandardlibrary};" ${windowsdxprogramfile}
 fi
 
 ################################################################################
 # ANDROID
+
+if [ $z == y ]; then
+set -x
+fi
 
 if [ $a == y ]; then
 # create MonoGame Android Application project
@@ -501,7 +523,7 @@ dotnet new mgandroid -n "${solutionname}.${android}"
 
 # add references to the MonoGame NetStandard Library to all platform projects
 echoverbose "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${android}" reference "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+dotnet add "${solutionname}.${android}" reference "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
 echo $delimiter
 # delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
 echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
@@ -520,7 +542,11 @@ awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
 androidactivityfile="${solutionname}.${android}/Activity1.cs"
-sed -i "2iusing ${solutionname}.NetStandardLibrary;" ${androidactivityfile}
+sed -i "2iusing ${solutionname}.${netstandardlibrary};" ${androidactivityfile}
+fi
+
+if [ $z == y ]; then
+set +x
 fi
 
 ################################################################################
@@ -538,21 +564,21 @@ if [ $s == y ]; then
 echoverbose "create solution file"
 dotnet new sln -n "${solutionname}"
 #
-echoverbose "Adding NetStandardLibrary project to solution"
-dotnet sln add "${solutionname}.NetStandardLibrary/${solutionname}.NetStandardLibrary.csproj"
+echoverbose "Adding ${netstandardlibrary} project to solution"
+dotnet sln add "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
 #
 if [ $a == y ]; then
-echoverbose "Adding android project to solution"
+echoverbose "Adding ${android} project to solution"
 dotnet sln add "${solutionname}.${android}/${solutionname}.${android}.csproj"
 fi
 #
 if [ $o == y ]; then
-echoverbose "Adding desktopgl project to solution"
+echoverbose "Adding ${desktopgl} project to solution"
 dotnet sln add "${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
 fi
 #
 if [ $w == y ]; then
-echoverbose "Adding windowsdx project to solution"
+echoverbose "Adding ${windowsdx} project to solution"
 dotnet sln add "${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
 fi
 #
