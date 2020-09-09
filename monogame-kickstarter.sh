@@ -1,6 +1,6 @@
 #! /bin/bash
 
-version="1.02"
+version="1.03"
 
 scriptname="monogame-kickstarter.sh"
 
@@ -538,7 +538,7 @@ rm "${solutionname}.${android}/Game1.cs"
 # change the link in all platform *.csproj project files so that it points to the content of the net standard library project
 # --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
 androidcontentfile="${solutionname}.${android}/${solutionname}.${android}.csproj"
-awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
+# awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
 androidactivityfile="${solutionname}.${android}/Activity1.cs"
@@ -641,15 +641,23 @@ echo "2. Add a reference to the Android project to the NetStandardLibrary projec
 echo "3. Inside Visual Studio delete or exclude the Game1.cs from the Android project"
 echo "(it should be marked as not found already because it was deleted already on disk by the script)"
 echo "4. Right click the Android project and select Set as Startup Project from the context menu."
+echo "5. You should now be able to build and deploy the Android app in Visual Studio if an emulator is configured or an android"
+echo "device is available in Visual Studio"
 echo ""
-echo "You can try and add an effect as test content with the mgcb-editor to the mgcb file from the NetStandardLibrary project"
-echo "You can then test if the content is available in the different projects by editing the Game1.cs file from the"
-echo "NetStandardLibrary project by running them with some test code which attempts to load the content."
+echo "To make the content from the NetStandardLibrary project available in the Android project you have to modify"
+echo "the Android.csproj file by hand and add the lines"
+echo '<ItemGroup>'
+echo "  <MonoGameContentReference Include=\"..\\${solutionname}.${netstandardlibrary}\Content\Content.mgcb\" Visible=\"false\" />"
+echo '</ItemGroup>'
+echo "You can add an effect as test content with the mgcb-editor to the mgcb file from the NetStandardLibrary project."
+echo "It should be available in the different projects."
+echo "Edit the Game1.cs file from the"
+echo "NetStandardLibrary project and add some test code which attempts to load the content."
 echo "In the LoadContent method of the Game1.cs of the NetStandardLibrary project add"
-echo "Effect effect = Content.Load<Effect>("effect");"
+echo 'Effect effect = Content.Load<Effect>("effect");'
 echo "and add / change the Clear color to be of a different color so you can verify the code is used / shared."
 echo "Just add / change the line in the Draw method of the Game1.cs of the NetStandardLibrary project e.g. to"
-echo "GraphicsDevice.Clear(Color.Turquoise);"
+echo 'GraphicsDevice.Clear(Color.Turquoise);'
 echo "${delimiter}"
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
