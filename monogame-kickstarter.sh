@@ -629,10 +629,28 @@ echo 'You should now be able to build and run the project(s) with'
 echo 'the command `dotnet run` from the project folder(s) or by passing the project.csproj file or'
 echo 'the project path as argument e.g.'
 if [ $a == y ]; then
-echo "dotnet run --project "${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj""
-echo "dotnet run --project "${slndir}/${solutionname}.${android}""
-fi
-if [ $o == y ]; then
+# echo "dotnet run --project "${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj""
+# echo "dotnet run --project "${slndir}/${solutionname}.${android}""
+echo "${delimiter}"
+echo "For Android manual steps are needed until .NET 6 in November 2021 is released which"
+echo "will support Xamarin.Android projects from the dotnet CLI. "
+echo ""
+echo "The manual steps using e.g. Visual Studio are:"
+echo "1. Open the solution and add the Android project"
+echo "2. Add a reference to the Android project to the NetStandardLibrary project"
+echo "3. Inside Visual Studio delete or exclude the Game1.cs from the Android project"
+echo "(it should be marked as not found already because it was deleted already on disk by the script)"
+echo "4. Right click the Android project and select Set as Startup Project from the context menu."
+echo ""
+echo "You can try and add an effect as test content with the mgcb-editor to the mgcb file from the NetStandardLibrary project"
+echo "You can then test if the content is available in the different projects by editing the Game1.cs file from the"
+echo "NetStandardLibrary project by running them with some test code which attempts to load the content."
+echo "In the LoadContent method of the Game1.cs of the NetStandardLibrary project add"
+echo "Effect effect = Content.Load<Effect>("effect");"
+echo "and add / change the Clear color to be of a different color so you can verify the code is used / shared."
+echo "Just add / change the line in the Draw method of the Game1.cs of the NetStandardLibrary project e.g. to"
+echo "GraphicsDevice.Clear(Color.Turquoise);"
+echo "${delimiter}"
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
 fi
