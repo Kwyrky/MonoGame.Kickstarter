@@ -1,6 +1,6 @@
 #! /bin/bash
 
-version="1.03"
+version="1.04"
 
 scriptname="monogame-kickstarter.sh"
 
@@ -15,6 +15,16 @@ ios="iOS"
 uwpcore="UWPCore"
 uwpxaml="UWPXaml"
 windowsdx="WindowsDX"
+#
+# files needed for the splash screen
+# "*source*" consts are the names of the files in the script base dir
+# "*target*" consts are the names of the files in the android project dir (inside the respective subdirs)
+# look at the cp commands at the bottom of the script
+androidsplashimagesource="MonoGameKickstarter-Splash-1080x1920.png"
+androidsplashimagetarget="Splash.png"
+androidsplashstylessource="Styles.xml"
+androidsplashstylestarget="Styles.xml"
+androidactivity1="Activity1.cs"
 
 # variables
 # outputdir="k1/j2/g3"
@@ -541,6 +551,7 @@ androidcontentfile="${solutionname}.${android}/${solutionname}.${android}.csproj
 # awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
+#### androidactivityfile="${solutionname}.${android}/${androidactivity1}"
 androidactivityfile="${solutionname}.${android}/Activity1.cs"
 sed -i "2iusing ${solutionname}.${netstandardlibrary};" ${androidactivityfile}
 fi
@@ -658,13 +669,32 @@ echo 'Effect effect = Content.Load<Effect>("effect");'
 echo "and add / change the Clear color to be of a different color so you can verify the code is used / shared."
 echo "Just add / change the line in the Draw method of the Game1.cs of the NetStandardLibrary project e.g. to"
 echo 'GraphicsDevice.Clear(Color.Turquoise);'
+fi
 echo "${delimiter}"
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
-fi
 if [ $w == y ]; then
 echo "dotnet run --project "${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj""
 echo "dotnet run --project "${slndir}/${solutionname}.${windowsdx}""
+fi
+
+# copy files needed for splash screen
+if [ $a == y ]; then
+echo "${delimiter}"
+echoverbose "Copy splash screen files to ${android} project"
+cp "$BASEPATH/$androidsplashimagesource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Drawable/$androidsplashimagetarget"
+cp "$BASEPATH/$androidsplashstylessource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Values/$androidsplashstylestarget"
+# TODO check if source files exist and verify files got copied after cp commands
+# only if cp commands were successful modify the android project's Activity1.cs to use the splash image!
+# add line to Activity1.cs
+# since we jumped up a directory before we need to compensate for this! So unlike above we here use
+# ${slndir}/${androidactivityfile}
+# not
+# ${androidactivityfile}
+# 
+# --> add `        Theme = "@style/Theme.Splash",` to line 14 of `MonoGameKickstarter.Android/Activity1.cs`
+androidactivityfile="${solutionname}.${android}/${androidactivity1}"
+sed -i "14i// Theme = \"@style/Theme.Splash\"," ${slndir}/${androidactivityfile}
 fi
 
 # finished
