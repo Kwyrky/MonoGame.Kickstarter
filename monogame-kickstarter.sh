@@ -694,7 +694,16 @@ cp "$BASEPATH/$androidsplashstylessource" "$BASEPATH/${slndir}/${solutionname}.$
 # 
 # --> add `        Theme = "@style/Theme.Splash",` to line 14 of `MonoGameKickstarter.Android/Activity1.cs`
 androidactivityfile="${solutionname}.${android}/${androidactivity1}"
-sed -i "14i// Theme = \"@style/Theme.Splash\"," ${slndir}/${androidactivityfile}
+sed -i "14i        Theme = \"@style/Theme.Splash\"," ${slndir}/${androidactivityfile}
+#
+androidproj="${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj"
+# --> add `        <AndroidResource Include="Resources\Drawable\Splash.png" />` to line 62 of `MonoGameKickstarter.Android/MonoGameKickstarter.Android.csproj`
+sed -i '63i    <AndroidResource Include="Resources\\\Drawable\\\'${androidsplashimagetarget}'" />' "${androidproj}"
+# --> add `        <AndroidResource Include="Resources\Values\Styles.xml" />` to line 64 of `MonoGameKickstarter.Android/MonoGameKickstarter.Android.csproj`
+sed -i '65i    <AndroidResource Include="Resources\\\Values\\\'${androidsplashstylestarget}'" />' "${androidproj}"
+#
+# --> delete line 57 `    <Compile Include="Game1.cs" />` from `MonoGameKickstarter.Android/MonoGameKickstarter.Android.csproj`
+sed -i '57d' "${androidproj}"
 fi
 
 # finished
