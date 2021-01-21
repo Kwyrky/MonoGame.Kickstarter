@@ -25,6 +25,15 @@ androidsplashimagetarget="Splash.png"
 androidsplashstylessource="Styles.xml"
 androidsplashstylestarget="Styles.xml"
 androidactivity1="Activity1.cs"
+#
+# sample files dir
+dirnamesamplefiles="mgks"
+# sample files for net standard library
+content="Content"
+samplefilesnetstandardlibraryeffectsource="effect.fx"
+samplefilesnetstandardlibraryeffectarget="effect.fx"
+samplefilesnetstandardlibrarycontentsource="Content.mgcb"
+samplefilesnetstandardlibrarycontenttarget="Content.mgcb"
 
 # variables
 # outputdir="k1/j2/g3"
@@ -548,7 +557,7 @@ rm "${solutionname}.${android}/Game1.cs"
 # change the link in all platform *.csproj project files so that it points to the content of the net standard library project
 # --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
 androidcontentfile="${solutionname}.${android}/${solutionname}.${android}.csproj"
-# awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
+awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
 # --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
 #### androidactivityfile="${solutionname}.${android}/${androidactivity1}"
@@ -705,6 +714,29 @@ sed -i '65i    <AndroidResource Include="Resources\\\Values\\\'${androidsplashst
 # --> delete line 57 `    <Compile Include="Game1.cs" />` from `MonoGameKickstarter.Android/MonoGameKickstarter.Android.csproj`
 sed -i '57d' "${androidproj}"
 fi
+#
+# copy mgks files to net standard project and add to mgcb content
+set -x
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibraryeffectarget}"
+rm "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
+set +x
+# 
+# add Game1.cs from net standard project as link
+#DATA='<Compile Include="..\ANDROIDSPLASH009.NetStandardLibrary\Game1.cs">\n<Link>Game1.cs</Link>\n</Compile>\n<Compile Include="Activity1.cs" />'
+#DATA=`echo ${DATA} | tr '\n' "\\n"`
+#now, DATA="line1\nline2\nline3"
+#sed -i "s/<Compile Include="Activity1.cs" />/${DATA}/" "${androidproj}"
+set -x
+#external_variable='<Compile Include="Activity1.cs" />'
+#awk 'match($0,v){print NR; exit}' v=$external_variable "${androidproj}"
+#
+#sed -i 'xxi    <AndroidResource Include="Resources\\\Values\\\'${androidsplashstylestarget}'" />' "${androidproj}"
+
+sed -i '56i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs">' "${androidproj}"
+sed -i '57i    <Link>Game1.cs</Link>' "${androidproj}"
+sed -i '58i    </Compile>' "${androidproj}"
+set +x
 
 # finished
 echo "${delimiter}"
