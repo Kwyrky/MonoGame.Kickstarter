@@ -1,4 +1,7 @@
-# outputdir
+# default outputdir
 [Mm]onogame-kickstarter/
 # all dirs
 */*
+# don't exclude the mgks directory
+!mgks/
+!mgks/*/
