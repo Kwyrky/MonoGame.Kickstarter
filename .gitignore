@@ -3,6 +3,6 @@
 # visual studio
 .vs
 # all dirs
-# */*
-# don't exclude the mgks directory
+*/*
+# don't exclude the mgks directory (does not work at the moment for some reason)
 !mgks/
