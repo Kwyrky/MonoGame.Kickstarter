@@ -735,6 +735,7 @@ echo 'Everything done! :-)'
 
 # TODO
 # add reference to net standard to android project (does not work for some reason maybe with update of .net core)
+# modify gitignore to include the mgks folder
 #
 # add testcode e.g.
 ### Effect effect = Content.Load<Effect>("effect");
