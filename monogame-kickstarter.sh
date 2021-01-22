@@ -715,40 +715,27 @@ sed -i '65i    <AndroidResource Include="Resources\\\Values\\\'${androidsplashst
 sed -i '57d' "${androidproj}"
 fi
 #
-# copy mgks files to net standard project and add to mgcb content
-set -x
+# copy mgks files to net standard project
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibraryeffectarget}"
 rm "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
-set +x
+# copy mgks files to android project
+# cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibraryeffectarget}"
+# rm "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
+# cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
 # 
 # add Game1.cs from net standard project as link
-#DATA='<Compile Include="..\ANDROIDSPLASH009.NetStandardLibrary\Game1.cs">\n<Link>Game1.cs</Link>\n</Compile>\n<Compile Include="Activity1.cs" />'
-#DATA=`echo ${DATA} | tr '\n' "\\n"`
-#now, DATA="line1\nline2\nline3"
-#sed -i "s/<Compile Include="Activity1.cs" />/${DATA}/" "${androidproj}"
-set -x
-#external_variable='<Compile Include="Activity1.cs" />'
-#awk 'match($0,v){print NR; exit}' v=$external_variable "${androidproj}"
-#
-#sed -i 'xxi    <AndroidResource Include="Resources\\\Values\\\'${androidsplashstylestarget}'" />' "${androidproj}"
-
 sed -i '56i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs">' "${androidproj}"
 sed -i '57i    <Link>Game1.cs</Link>' "${androidproj}"
 sed -i '58i    </Compile>' "${androidproj}"
-set +x
 
 # finished
 echo "${delimiter}"
 echo 'Everything done! :-)'
 
 # TODO
-# add to sln
-# add reference to net standard
-# remove <android>.csproj line 57: <Compile Include="Game1.cs" />
-# change awk replace of content with add to have both the android content and shared content
-# copy mgks files to net standard project content
+# add reference to net standard to android project (does not work for some reason maybe with update of .net core)
 #
-# add testcode lines
+# add testcode e.g.
 ### Effect effect = Content.Load<Effect>("effect");
 ### GraphicsDevice.Clear(Color.Turquoise);
