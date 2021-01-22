@@ -28,12 +28,25 @@ androidactivity1="Activity1.cs"
 #
 # sample files dir
 dirnamesamplefiles="mgks"
-# sample files for net standard library
 content="Content"
+# sample files for net standard library
 samplefilesnetstandardlibraryeffectsource="effect.fx"
 samplefilesnetstandardlibraryeffectarget="effect.fx"
+samplefilesnetstandardlibrarytexturesource="texture.png"
+samplefilesnetstandardlibrarytexturetarget="texture.png"
 samplefilesnetstandardlibrarycontentsource="Content.mgcb"
 samplefilesnetstandardlibrarycontenttarget="Content.mgcb"
+# sample files for android
+samplefilesandroideffectsource="androideffect.fx"
+samplefilesandroideffectarget="androideffect.fx"
+samplefilesandroidtexturesource="androidtexture.png"
+samplefilesandroidtexturetarget="androidtexture.png"
+samplefilesandroidcontentsource="AndroidContent.mgcb"
+samplefilesandroidcontenttarget="AndroidContent.mgcb"
+samplefilesandroidcontentgenerated="Content.mgcb"
+# sample files containing sample source code for net standard library
+samplefilesgame1source="Game1.cs"
+samplefilesgame1target="Game1.cs"
 
 # variables
 # outputdir="k1/j2/g3"
@@ -717,26 +730,43 @@ fi
 #
 # copy mgks files to net standard project
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibraryeffectarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarytexturesource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarytexturetarget}"
 rm "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
 # copy mgks files to android project
-# cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibraryeffectarget}"
-# rm "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
-# cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
-# 
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroideffectsource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroideffectarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidtexturesource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidtexturetarget}"
+rm "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontentgenerated}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidcontentsource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontenttarget}"
+# copy Game1.cs with sample code from mgks folder to net standard project folder
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgame1source}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${samplefilesgame1target}"
+#
 # add Game1.cs from net standard project as link
 sed -i '56i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs">' "${androidproj}"
 sed -i '57i    <Link>Game1.cs</Link>' "${androidproj}"
 sed -i '58i    </Compile>' "${androidproj}"
+# add     <None Include="Content\AndroidContent.mgcb" />
+sed -i '71i     <None Include="Content\\\'${samplefilesandroidcontenttarget}'" />' "${androidproj}"
+#
+# replace namespace in sample Game1.cs "template"
+# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.OpenGL/MonoGameKickstarter.OpenGL.csproj`
+game1targetfile="${slndir}/${solutionname}.${netstandardlibrary}/${samplefilesgame1target}"
+namespacereplacestring="${solutionname}"
+awk -i inplace -v AWK="${namespacereplacestring}" '{sub(/MONOGAMEKICKSTARTERNAMESPACE/,AWK)}1' ${game1targetfile}
 
 # finished
 echo "${delimiter}"
 echo 'Everything done! :-)'
 
-# TODO
+# TODO monogame-kickstarter.sh
 # add reference to net standard to android project (does not work for some reason maybe with update of .net core)
 # modify gitignore to include the mgks folder
 #
-# add testcode e.g.
-### Effect effect = Content.Load<Effect>("effect");
-### GraphicsDevice.Clear(Color.Turquoise);
+# TODO in generated solutions / projects
+#
+# Add the android project to the solution 
+# Add a reference to the android project to the net standard library project
+#
+# Add Game1.cs from the net standard library project to all other projects as link (important!)
+# Add Conditional compilation symbols to each project except the net standard library ("ANDROID" to the android project, "OPENGL" to the desktopgl project, etc.)
+# --> The opengl project should now run with green instead of cornflower blue background

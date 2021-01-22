@@ -1,7 +1,8 @@
 # default outputdir
 [Mm]onogame-kickstarter/
+# visual studio
+.vs
 # all dirs
-*/*
+# */*
 # don't exclude the mgks directory
 !mgks/
-!mgks/*/
