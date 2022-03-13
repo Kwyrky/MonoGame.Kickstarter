@@ -10,7 +10,6 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        // MonoGame.Kickstarter sample code BEGIN
         public enum Platform { Android, Windows, Linux, MacOS, Other }
         public enum GraphicsBackend { OpenGL, DirectX, Other }
         //
@@ -28,7 +27,6 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
         private VertexBuffer vertexBuffer;
         private VertexPositionColorTexture[] vertices;
         private int[] indices;
-        // MonoGame.Kickstarter sample code END
 
         public Game1()
         {
@@ -39,10 +37,8 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
 
         protected override void Initialize()
         {
-            // MonoGame.Kickstarter sample code BEGIN
             GetCurrentPlatform();
             GetCurrentPlatformByConditionalCompilationSymbols();
-            // MonoGame.Kickstarter sample code END
 
             base.Initialize();
         }
@@ -51,13 +47,10 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // MonoGame.Kickstarter sample code BEGIN
             LoadEffect();
             LoadVerticesIndicesBufferMatrices();
-            // MonoGame.Kickstarter sample code END
         }
 
-        // MonoGame.Kickstarter sample code BEGIN
         private void LoadVerticesIndicesBufferMatrices()
         {
             vertexBuffer = new VertexBuffer(GraphicsDevice, VertexPositionColorTexture.VertexDeclaration, 4, BufferUsage.WriteOnly);
@@ -88,15 +81,16 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
             view = Matrix.CreateLookAt(Vector3.Zero, Vector3.Forward, Vector3.Up);
             projection = Matrix.CreatePerspective(10.0f * GraphicsDevice.Viewport.AspectRatio, 10.0f, 1.0f, 1000.0f);
         }
-        // MonoGame.Kickstarter sample code END
 
-        // MonoGame.Kickstarter sample code BEGIN
         private void LoadEffect()
         {
-#if ANDROID // After the Android project has been added to the solution add a "ANDROID" to "Conditional compilation symbols" (Project Properties|Build|Conditional compilation symbols)
+#if ANDROID
             effect = Content.Load<Effect>("androideffect");
             texture = Content.Load<Texture2D>("androidtexture");
-#elif OPENGL
+#elif DESKTOPGL
+            effect = Content.Load<Effect>("effect");
+            texture = Content.Load<Texture2D>("texture");
+#elif WINDOWSDX
             effect = Content.Load<Effect>("effect");
             texture = Content.Load<Texture2D>("texture");
 #else
@@ -104,40 +98,51 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
             texture = Content.Load<Texture2D>("texture");
 #endif
         }
-        // MonoGame.Kickstarter sample code END
+
+        // necessary until fix for is applied to nugets
+        // https://github.com/MonoGame/MonoGame/pull/7459
+        // but may also be used to get informed about the game exiting anyway
+        // although there should be already events for that scenario.
+        public event EventHandler ExitedEventHandler;
+        protected virtual void OnExitedEventHandler(EventArgs e)
+        {
+            ExitedEventHandler?.Invoke(this, e);
+        }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            GamePadState gamePadState = GamePad.GetState(PlayerIndex.One);
+            bool isBackButtonPressed = gamePadState.Buttons.Back == ButtonState.Pressed;
+            if (isBackButtonPressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
                 Exit();
+                // necessary until fix for is applied to nugets
+                // https://github.com/MonoGame/MonoGame/pull/7459
+                // but may also be used to get informed about the game exiting anyway
+                // although there should be already events for that scenario.
+                OnExitedEventHandler(EventArgs.Empty);
+                // TODO: Add this to Activity1.cs before "_game.Run();":
+                // _game.ExitedEventHandler += (object s, EventArgs e) => { Process.KillProcess(Process.MyPid()); };
+            }
 
-            // MonoGame.Kickstarter sample code BEGIN
             UpdateAnimation(gameTime);
-            // MonoGame.Kickstarter sample code END
 
             base.Update(gameTime);
         }
 
-        // MonoGame.Kickstarter sample code BEGIN
         private void UpdateAnimation(GameTime gameTime)
         {
             float radians = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds));
             world = Matrix.CreateRotationZ(radians);
         }
-        // MonoGame.Kickstarter sample code END
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            //GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // MonoGame.Kickstarter sample code BEGIN
-            // ClearBackgroundBasedOnCurrentPlatform(CurrentPlatform);
-            // MonoGame.Kickstarter sample code END
-
-            // MonoGame.Kickstarter sample code BEGIN
+            // ClearBackgroundBasedOnCurrentPlatform(platform);
             ClearBackgroundBasedOnConditionalCompilationSymbol();
             DrawQuad();
-            // MonoGame.Kickstarter sample code END
 
             base.Draw(gameTime);
         }
@@ -161,20 +166,17 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
             }
         }
 
-        // MonoGame.Kickstarter sample code BEGIN
         private void ClearBackgroundBasedOnConditionalCompilationSymbol()
         {
-#if ANDROID // After the Android project has been added to the solution add a "ANDROID" to "Conditional compilation symbols" (Project Properties|Build|Conditional compilation symbols)
+#if ANDROID // After the Android project has been added to the solution add "ANDROID" to "Conditional compilation symbols" (Project Properties|Build|Conditional compilation symbols)
             GraphicsDevice.Clear(Color.MonoGameOrange);
-#elif OPENGL
+#elif DESKTOPGL
             GraphicsDevice.Clear(Color.Lime);
 #else
             GraphicsDevice.Clear(Color.CornflowerBlue);
 #endif
         }
-        // MonoGame.Kickstarter sample code END
 
-        // MonoGame.Kickstarter sample code BEGIN
         private void ClearBackgroundBasedOnCurrentPlatform(Platform Platform)
         {
             switch (Platform)
@@ -195,9 +197,7 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
                     break;
             }
         }
-        // MonoGame.Kickstarter sample code END
 
-        // MonoGame.Kickstarter sample code BEGIN
         private void GetCurrentPlatform()
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
@@ -219,9 +219,7 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
 
             graphicsBackend = GraphicsBackend.OpenGL;
         }
-        // MonoGame.Kickstarter sample code END
 
-        // MonoGame.Kickstarter sample code BEGIN
         private void GetCurrentPlatformByConditionalCompilationSymbols()
         {
 #if ANDROID
@@ -230,6 +228,5 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
             platformByConditionalCompilationSymbols = Platform.Other;
 #endif
         }
-        // MonoGame.Kickstarter sample code END
     }
 }

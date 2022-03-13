@@ -1,6 +1,6 @@
 #! /bin/bash
 
-version="1.04"
+version="1.06"
 
 scriptname="monogame-kickstarter.sh"
 
@@ -10,7 +10,8 @@ delimiter="#####################################################################
 netstandardlibrary="NetStandardLibrary"
 #
 android="Android"
-desktopgl="OpenGL"
+#desktopgl="OpenGL"
+desktopgl="DesktopGL"
 ios="iOS"
 uwpcore="UWPCore"
 uwpxaml="UWPXaml"
@@ -85,6 +86,10 @@ fi
 eval set -- "$PARSED"
 
 # set defaults
+# if you want different defaults just change the "y" and "n" in the following lines for
+# each option.
+# The default settings are copied to the long names in the respective next line.
+#
 h=n
 help="$h"
 #
@@ -131,7 +136,7 @@ w=n
 mgwindowsdx="$w"
 
 
-# initial values of variables to keep track of some things
+# initial values of variables to keep track of some things / for debug
 numprojects=0
 #
 numsolutionargs=0
@@ -232,15 +237,18 @@ done
 
 # if we do not have a name as option argument we check 
 # that we do not have more than one non-option argument
+# we want either no non-option argument (which will be taken as the solution name)
+# or we want exactly one non-option argument which will be used as solution name
 if [ -z ${name+x} ]; then
 if [[ $# -gt 1 ]]; then
     echo "More than one non-option argument found."
-    echo "Please use no non-option argument to use the default value or"
+    echo "Please use no non-option argument to use the default value OR"
     echo "pass only one non-option argument which will be used as name."
     exit 4
 fi
 fi
 
+# output debug information if option argument d is set to y (d=y in the lines above)
 if [ $d == y ]; then
 echo "help: $h [$help]"
 echo "rocket: $r [$rocket]"
@@ -733,16 +741,20 @@ cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibraryeffectsource}
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarytexturesource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarytexturetarget}"
 rm "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
+#
+if [ $a == y ]; then
 # copy mgks files to android project
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroideffectsource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroideffectarget}"
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidtexturesource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidtexturetarget}"
 rm "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontentgenerated}"
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidcontentsource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontenttarget}"
+#
+fi
 # copy Game1.cs with sample code from mgks folder to net standard project folder
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgame1source}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${samplefilesgame1target}"
 #
 # add Game1.cs from net standard project as link
-sed -i '56i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs">' "${androidproj}"
+sed -i '56i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs" Link="Game1ANDROID">' "${androidproj}"
 sed -i '57i    <Link>Game1.cs</Link>' "${androidproj}"
 sed -i '58i    </Compile>' "${androidproj}"
 # add     <None Include="Content\AndroidContent.mgcb" />
@@ -753,20 +765,70 @@ sed -i '71i     <None Include="Content\\\'${samplefilesandroidcontenttarget}'" /
 game1targetfile="${slndir}/${solutionname}.${netstandardlibrary}/${samplefilesgame1target}"
 namespacereplacestring="${solutionname}"
 awk -i inplace -v AWK="${namespacereplacestring}" '{sub(/MONOGAMEKICKSTARTERNAMESPACE/,AWK)}1' ${game1targetfile}
-
+#
+# replace public by internal in Game1 to avoid CS0436 
+# --> Warning CS0436 The type 'Game1' in 'slnname.NetStandardLibrary\Game1.cs' conflicts with the imported type 'Game1' in 'slnname.NetStandardLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'slnname.NetStandardLibrary\Game1.cs'.
+accessmodifierreplacestring="internal class "
+awk -i inplace -v AWK="${accessmodifierreplacestring}" '{sub(/public class /,AWK)}1' ${game1targetfile}
+#
+if [ $w == y ]; then
+# add Game1.cs from net standard project as link to WinDX project (TODO check if option set! / project exists)
+windowsdxprojectfullpath="${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
+sed -i '20i    <ItemGroup>' "${windowsdxprojectfullpath}"
+sed -i '21i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs" Link="Game1.cs" />' "${windowsdxprojectfullpath}"
+sed -i '22i    </ItemGroup>' "${windowsdxprojectfullpath}"
+fi
+#
+# add Game1.cs from net standard project as link to OpenGL project (TODO check if option set! / project exists)
+# we seem to have a slight template difference, so we need to add the lines one line further in comparison
+# with the windowsdx project
+desktopglprojectfullpath="${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
+sed -i '20i    <ItemGroup>' "${desktopglprojectfullpath}"
+sed -i '21i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs" Link="Game1.cs" />' "${desktopglprojectfullpath}"
+sed -i '22i    </ItemGroup>' "${desktopglprojectfullpath}"
+#
+# ??????????????????????????????????????????????????????????????????
+# ??????????????????????????????????????????????????????????????????
+# ??????????????????????????????????????????????????????????????????
+# add CCS / conditional compilation symbols
+if [ $w == y ]; then
+# add CCS WINDOWSDX (TODO check if option set! / project exists)
+# <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+#  <DefineConstants>TRACE;WINDOWSDX</DefineConstants>
+# </PropertyGroup>
+# TIPP: replacing ' with '\'' helps...
+windowsdxprojectfullpath="${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
+sed -i '13i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Debug|AnyCPU'\''">' "${windowsdxprojectfullpath}"
+sed -i '14i     <DefineConstants>TRACE;WINDOWSDX</DefineConstants>' "${windowsdxprojectfullpath}"
+sed -i '15i    </PropertyGroup>' "${windowsdxprojectfullpath}"
+fi
+#
+# add CCS DESKTOPGL (TODO check if option set! / project exists)
+# <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+#   <DefineConstants>TRACE;DESKTOPGL</DefineConstants>
+# </PropertyGroup>
+# TIPP: replacing ' with '\'' helps...
+desktopglprojectfullpath="${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
+sed -i '12i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Debug|AnyCPU'\''">' "${desktopglprojectfullpath}"
+sed -i '13i      <DefineConstants>TRACE;DESKTOPGL</DefineConstants>' "${desktopglprojectfullpath}"
+sed -i '14i    </PropertyGroup>' "${desktopglprojectfullpath}"
+# ??????????????????????????????????????????????????????????????????
+# ??????????????????????????????????????????????????????????????????
+# ??????????????????????????????????????????????????????????????????
 # finished
 echo "${delimiter}"
 echo 'Everything done! :-)'
 
-# TODO monogame-kickstarter.sh
-# add reference to net standard to android project (does not work for some reason maybe with update of .net core)
-# modify gitignore to include the mgks folder
+# TODO monogame-kickstarter.sh:
+# add reference to net standard to android project (does not work for some reason maybe with update of .net core).
+# The gitignore does exclude all subdirs because we don't want our generated projects folders added to the MonoGame Kickstarter repo!
+# There is a line in the gitignore to include the mgks folder, which we want to have inside the MonoGame Kickstarter repo but it does not work
+# for some reason --> check the gitignore file
 #
-# TODO in generated solutions / projects
-#
+# TODO in generated solutions / projects:
 # Add the android project to the solution 
 # Add a reference to the android project to the net standard library project
 #
 # Add Game1.cs from the net standard library project to all other projects as link (important!)
-# Add Conditional compilation symbols to each project except the net standard library ("ANDROID" to the android project, "OPENGL" to the desktopgl project, etc.)
+# Add Conditional compilation symbols to each project except the net standard library ("ANDROID" to the android project, "DESKTOPGL" to the desktopgl project, etc.)
 # --> The opengl project should now run with green instead of cornflower blue background
