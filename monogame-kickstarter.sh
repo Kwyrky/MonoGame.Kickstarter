@@ -1,6 +1,6 @@
 #! /bin/bash
 
-version="1.06"
+version="1.07"
 
 scriptname="monogame-kickstarter.sh"
 
@@ -117,7 +117,7 @@ nosolution="$S"
 v=n
 verbose="$v"
 #
-a=y
+a=n
 mgandroid="$a"
 #
 o=y
@@ -753,12 +753,14 @@ fi
 # copy Game1.cs with sample code from mgks folder to net standard project folder
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgame1source}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${samplefilesgame1target}"
 #
+if [ $a == y ]; then
 # add Game1.cs from net standard project as link
 sed -i '56i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs" Link="Game1ANDROID">' "${androidproj}"
 sed -i '57i    <Link>Game1.cs</Link>' "${androidproj}"
 sed -i '58i    </Compile>' "${androidproj}"
 # add     <None Include="Content\AndroidContent.mgcb" />
 sed -i '71i     <None Include="Content\\\'${samplefilesandroidcontenttarget}'" />' "${androidproj}"
+fi
 #
 # replace namespace in sample Game1.cs "template"
 # --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.OpenGL/MonoGameKickstarter.OpenGL.csproj`
