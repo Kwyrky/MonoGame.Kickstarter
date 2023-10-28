@@ -156,11 +156,11 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.GameLibrary
             GraphicsDevice.Indices = indexBuffer;
             GraphicsDevice.SetVertexBuffer(vertexBuffer);
 
-            effect.Parameters["World"].SetValue(baseWorld * world);
-            effect.Parameters["View"].SetValue(view);
-            effect.Parameters["Projection"].SetValue(projection);
-            effect.Parameters["Texture"].SetValue(texture);
-            effect.Parameters["Time"].SetValue(time);
+            effect.Parameters["World"]?.SetValue(baseWorld * world);
+            effect.Parameters["View"]?.SetValue(view);
+            effect.Parameters["Projection"]?.SetValue(projection);
+            effect.Parameters["Texture"]?.SetValue(texture);
+            effect.Parameters["Time"]?.SetValue(time);
 
             foreach (EffectPass pass in effect.CurrentTechnique.Passes)
             {
