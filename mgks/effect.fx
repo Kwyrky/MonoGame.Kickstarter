@@ -11,8 +11,9 @@ float4x4 World;
 float4x4 View;
 float4x4 Projection;
 
+float Time;
+
 texture Texture;
- 
 sampler TextureSampler = sampler_state
 {
     texture = <Texture>;

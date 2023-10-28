@@ -7,7 +7,7 @@ scriptname="monogame-kickstarter.sh"
 # constants
 delimiter="################################################################################"
 #
-netstandardlibrary="NetStandardLibrary"
+gamelibrary="GameLibrary"
 #
 android="Android"
 #desktopgl="OpenGL"
@@ -30,13 +30,13 @@ androidactivity1="Activity1.cs"
 # sample files dir
 dirnamesamplefiles="mgks"
 content="Content"
-# sample files for net standard library
-samplefilesnetstandardlibraryeffectsource="effect.fx"
-samplefilesnetstandardlibraryeffectarget="effect.fx"
-samplefilesnetstandardlibrarytexturesource="texture.png"
-samplefilesnetstandardlibrarytexturetarget="texture.png"
-samplefilesnetstandardlibrarycontentsource="Content.mgcb"
-samplefilesnetstandardlibrarycontenttarget="Content.mgcb"
+# sample files for GameLibrary library
+samplefilesgamelibraryeffectsource="effect.fx"
+samplefilesgamelibraryeffectarget="effect.fx"
+samplefilesgamelibrarytexturesource="texture.png"
+samplefilesgamelibrarytexturetarget="texture.png"
+samplefilesgamelibrarycontentsource="Content.mgcb"
+samplefilesgamelibrarycontenttarget="Content.mgcb"
 # sample files for android
 samplefilesandroideffectsource="androideffect.fx"
 samplefilesandroideffectarget="androideffect.fx"
@@ -45,7 +45,7 @@ samplefilesandroidtexturetarget="androidtexture.png"
 samplefilesandroidcontentsource="AndroidContent.mgcb"
 samplefilesandroidcontenttarget="AndroidContent.mgcb"
 samplefilesandroidcontentgenerated="Content.mgcb"
-# sample files containing sample source code for net standard library
+# sample files containing sample source code for GameLibrary library
 samplefilesgame1source="Game1.cs"
 samplefilesgame1target="Game1.cs"
 
@@ -117,7 +117,7 @@ nosolution="$S"
 v=n
 verbose="$v"
 #
-a=n
+a=y
 mgandroid="$a"
 #
 o=y
@@ -377,7 +377,7 @@ fi
 ###########################################################################
 
 echo "${delimiter}"
-echo "This is MonoGameKickstarter ${version}"
+echo "This is MonoGameKickstarter ${version} for MonoGame 3.8.1.303"
 
 # check parameter
 echo "${delimiter}"
@@ -484,9 +484,9 @@ echoverbose 'Setting up solution and / or project(s) now...'
 workingdir="$(pwd)"
 cd "$slndir"
 
-# create MonoGame NetStandard Library project for code / content sharing
-echoverbose "create MonoGame NetStandard Library project for code / content sharing"
-dotnet new mgnetstandard -n "${solutionname}.${netstandardlibrary}"
+# create MonoGame GameLibrary Library project for code / content sharing
+echoverbose "create MonoGame GameLibrary Library project for code / content sharing"
+dotnet new mglib -n "${solutionname}.${gamelibrary}"
 echo "${delimiter}"
 
 ################################################################################
@@ -501,22 +501,24 @@ if [ $o == y ]; then
 echoverbose "create MonoGame Cross-Platform Desktop Application (OpenGL) project"
 dotnet new mgdesktopgl -n "${solutionname}.${desktopgl}"
 
-# add references to the MonoGame NetStandard Library to all platform projects
-echoverbose "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${desktopgl}" reference "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
+# add references to the MonoGame GameLibrary Library to all platform projects
+echoverbose "add references to the GameLibrary library to all platform projects"
+dotnet add "${solutionname}.${desktopgl}" reference "${solutionname}.${gamelibrary}/${solutionname}.${gamelibrary}.csproj"
 echo $delimiter
-# delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
-echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
+# delete files from project(s) which exist in the MonoGame GameLibrary Library project and will be used from there
+echoverbose "delete files from projects which exist in the GameLibrary library project and will be used from there"
 rm -r "${solutionname}.${desktopgl}/Content"
 rm "${solutionname}.${desktopgl}/Game1.cs"
-# change the link in all platform *.csproj project files so that it points to the content of the net standard library project
-# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.OpenGL/MonoGameKickstarter.OpenGL.csproj`
+# change the link in all platform *.csproj project files so that it points to the content of the GameLibrary library project
+# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.GameLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.OpenGL/MonoGameKickstarter.OpenGL.csproj`
 openglcontentfile="${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
-awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${openglcontentfile}
+awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".GameLibrary\\Content\\Content.mgcb")}1' ${openglcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
-# --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.OpenGL/Program.cs`
+# --> add `using MonoGameKickstarter.GameLibrary;` to second line of `MonoGameKickstarter.OpenGL/Program.cs`
 openglprogramfile="${solutionname}.${desktopgl}/Program.cs"
-sed -i "2iusing ${solutionname}.${netstandardlibrary};" ${openglprogramfile}
+sed -i "2iusing ${solutionname}.${gamelibrary};" ${openglprogramfile}
+sed -i "3d" ${openglprogramfile}
+sed -i "3iusing var game = new ${solutionname}.${gamelibrary}.Game1();" ${openglprogramfile}
 fi
 
 if [ $z == y ]; then
@@ -531,22 +533,24 @@ if [ $w == y ]; then
 echoverbose "create MonoGame Windows Desktop Application (Windows DirectX) project"
 dotnet new mgwindowsdx -n "${solutionname}.${windowsdx}"
 
-# add references to the MonoGame NetStandard Library to all platform projects
-echoverbose "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${windowsdx}" reference "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
+# add references to the MonoGame GameLibrary Library to all platform projects
+echoverbose "add references to the GameLibrary library to all platform projects"
+dotnet add "${solutionname}.${windowsdx}" reference "${solutionname}.${gamelibrary}/${solutionname}.${gamelibrary}.csproj"
 echo $delimiter
-# delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
-echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
+# delete files from project(s) which exist in the MonoGame GameLibrary Library project and will be used from there
+echoverbose "delete files from projects which exist in the GameLibrary library project and will be used from there"
 rm -r "${solutionname}.${windowsdx}/Content"
 rm "${solutionname}.${windowsdx}/Game1.cs"
-# change the link in all platform *.csproj project files so that it points to the content of the net standard library project
-# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
+# change the link in all platform *.csproj project files so that it points to the content of the GameLibrary library project
+# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.GameLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
 windowsdxcontentfile="${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
-awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${windowsdxcontentfile}
+awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".GameLibrary\\Content\\Content.mgcb")}1' ${windowsdxcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
-# --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
+# --> add `using MonoGameKickstarter.GameLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
 windowsdxprogramfile="${solutionname}.${windowsdx}/Program.cs"
-sed -i "2iusing ${solutionname}.${netstandardlibrary};" ${windowsdxprogramfile}
+sed -i "2iusing ${solutionname}.${gamelibrary};" ${windowsdxprogramfile}
+sed -i "3d" ${windowsdxprogramfile}
+sed -i "3iusing var game = new ${solutionname}.${gamelibrary}.Game1();" ${windowsdxprogramfile}
 fi
 
 ################################################################################
@@ -561,29 +565,29 @@ if [ $a == y ]; then
 echoverbose "create MonoGame Android Application project"
 dotnet new mgandroid -n "${solutionname}.${android}"
 
-# add references to the MonoGame NetStandard Library to all platform projects
-echoverbose "add references to the net standard library to all platform projects"
-dotnet add "${solutionname}.${android}" reference "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
+# add references to the MonoGame GameLibrary Library to all platform projects
+echoverbose "add references to the GameLibrary library to all platform projects"
+dotnet add "${solutionname}.${android}" reference "${solutionname}.${gamelibrary}/${solutionname}.${gamelibrary}.csproj"
 echo $delimiter
-# delete files from project(s) which exist in the MonoGame NetStandard Library project and will be used from there
-echoverbose "delete files from projects which exist in the net standard library project and will be used from there"
+# delete files from project(s) which exist in the MonoGame GameLibrary Library project and will be used from there
+echoverbose "delete files from projects which exist in the GameLibrary library project and will be used from there"
 
 # For ANDROID we leave the original Content folder provided by the Android template where it is 
 # because maybe for an app you want to add modified content in some way at some point
-# We just add the content from the net standard project so that it is available in the shared code
+# We just add the content from the GameLibrary project so that it is available in the shared code
 # and we get a working App from the start.
 ### rm -r "${solutionname}.${android}/Content"
 
 rm "${solutionname}.${android}/Game1.cs"
-# change the link in all platform *.csproj project files so that it points to the content of the net standard library project
-# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
+# change the link in all platform *.csproj project files so that it points to the content of the GameLibrary library project
+# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.GameLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.WindowsDX/MonoGameKickstarter.WindowsDX.csproj`
 androidcontentfile="${solutionname}.${android}/${solutionname}.${android}.csproj"
-awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".NetStandardLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
+awk -i inplace -v AWK="${solutionname}" '{sub(/Content\\Content.mgcb/,"..\\" AWK ".GameLibrary\\Content\\Content.mgcb")}1' ${androidcontentfile}
 # add using directives to the file `Program.cs` of all platform projects
-# --> add `using MonoGameKickstarter.NetStandardLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
+# --> add `using MonoGameKickstarter.GameLibrary;` to second line of `MonoGameKickstarter.WindowsDX/Program.cs`
 #### androidactivityfile="${solutionname}.${android}/${androidactivity1}"
 androidactivityfile="${solutionname}.${android}/Activity1.cs"
-sed -i "2iusing ${solutionname}.${netstandardlibrary};" ${androidactivityfile}
+sed -i "2iusing ${solutionname}.${gamelibrary};" ${androidactivityfile}
 fi
 
 if [ $z == y ]; then
@@ -605,8 +609,8 @@ if [ $s == y ]; then
 echoverbose "create solution file"
 dotnet new sln -n "${solutionname}"
 #
-echoverbose "Adding ${netstandardlibrary} project to solution"
-dotnet sln add "${solutionname}.${netstandardlibrary}/${solutionname}.${netstandardlibrary}.csproj"
+echoverbose "Adding ${gamelibrary} project to solution"
+dotnet sln add "${solutionname}.${gamelibrary}/${solutionname}.${gamelibrary}.csproj"
 #
 if [ $a == y ]; then
 echoverbose "Adding ${android} project to solution"
@@ -673,32 +677,16 @@ if [ $a == y ]; then
 # echo "dotnet run --project "${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj""
 # echo "dotnet run --project "${slndir}/${solutionname}.${android}""
 echo "${delimiter}"
-echo "For Android manual steps are needed until .NET 6 in November 2021 is released which"
-echo "will support Xamarin.Android projects from the dotnet CLI. "
+echo "For Android manual steps are needed: "
 echo ""
-echo "The manual steps using e.g. Visual Studio are:"
-echo "1. Open the solution and add the Android project"
-echo "2. Add a reference to the Android project to the NetStandardLibrary project"
-echo "3. Inside Visual Studio delete or exclude the Game1.cs from the Android project"
-echo "(it should be marked as not found already because it was deleted already on disk by the script)"
-echo "4. Right click the Android project and select Set as Startup Project from the context menu."
-echo "5. You should now be able to build and deploy the Android app in Visual Studio if an emulator is configured or an android"
-echo "device is available in Visual Studio"
+echo "1. Open the solution in Visual Studio and right click the solution in the solution explorer to open the solution properties."
+echo "2. For Configuration select 'All Configurations' from the combo box"
+echo "3. Select 'Configuration Properties' on the list to show the 'project contexts'"
+echo "4. Make sure that for the Android project contexts both checkboxes for build and deploy are checked!"
+echo "5. It should now be possible to build and deploy the Android app in Visual Studio if an android emulator is configured or"
+echo " a real device is connected and available in Visual Studio"
 echo ""
-echo "To make the content from the NetStandardLibrary project available in the Android project you have to modify"
-echo "the Android.csproj file by hand and add the lines"
-echo '<ItemGroup>'
-echo "  <MonoGameContentReference Include=\"..\\${solutionname}.${netstandardlibrary}\Content\Content.mgcb\" Visible=\"false\" />"
-echo '</ItemGroup>'
-echo "You can add an effect as test content with the mgcb-editor to the mgcb file from the NetStandardLibrary project."
-echo "It should be available in the different projects."
-echo "Edit the Game1.cs file from the"
-echo "NetStandardLibrary project and add some test code which attempts to load the content."
-echo "In the LoadContent method of the Game1.cs of the NetStandardLibrary project add"
-echo 'Effect effect = Content.Load<Effect>("effect");'
-echo "and add / change the Clear color to be of a different color so you can verify the code is used / shared."
-echo "Just add / change the line in the Draw method of the Game1.cs of the NetStandardLibrary project e.g. to"
-echo 'GraphicsDevice.Clear(Color.Turquoise);'
+
 fi
 echo "${delimiter}"
 echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj""
@@ -706,6 +694,10 @@ echo "dotnet run --project "${slndir}/${solutionname}.${desktopgl}""
 if [ $w == y ]; then
 echo "dotnet run --project "${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj""
 echo "dotnet run --project "${slndir}/${solutionname}.${windowsdx}""
+fi
+if [ $a == y ]; then
+echo "dotnet run --project "${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj""
+echo "dotnet run --project "${slndir}/${solutionname}.${android}""
 fi
 
 # copy files needed for splash screen
@@ -736,11 +728,11 @@ sed -i '65i    <AndroidResource Include="Resources\\\Values\\\'${androidsplashst
 sed -i '57d' "${androidproj}"
 fi
 #
-# copy mgks files to net standard project
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibraryeffectarget}"
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarytexturesource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarytexturetarget}"
-rm "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesnetstandardlibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${content}/${samplefilesnetstandardlibrarycontenttarget}"
+# copy mgks files to GameLibrary project
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibraryeffectarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibrarytexturesource}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarytexturetarget}"
+rm "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarycontenttarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarycontenttarget}"
 #
 if [ $a == y ]; then
 # copy mgks files to android project
@@ -750,44 +742,42 @@ rm "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandro
 cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidcontentsource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontenttarget}"
 #
 fi
-# copy Game1.cs with sample code from mgks folder to net standard project folder
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgame1source}" "$BASEPATH/${slndir}/${solutionname}.${netstandardlibrary}/${samplefilesgame1target}"
+# copy Game1.cs with sample code from mgks folder to GameLibrary project folder
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgame1source}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${samplefilesgame1target}"
 #
-if [ $a == y ]; then
-# add Game1.cs from net standard project as link
-sed -i '56i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs" Link="Game1ANDROID">' "${androidproj}"
+# add Game1.cs from GameLibrary project as link
+sed -i '56i    <Compile Include="..\\\'${solutionname}.${gamelibrary}'\\\Game1.cs" Link="Game1ANDROID">' "${androidproj}"
 sed -i '57i    <Link>Game1.cs</Link>' "${androidproj}"
 sed -i '58i    </Compile>' "${androidproj}"
 # add     <None Include="Content\AndroidContent.mgcb" />
 sed -i '71i     <None Include="Content\\\'${samplefilesandroidcontenttarget}'" />' "${androidproj}"
-fi
 #
 # replace namespace in sample Game1.cs "template"
-# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.NetStandardLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.OpenGL/MonoGameKickstarter.OpenGL.csproj`
-game1targetfile="${slndir}/${solutionname}.${netstandardlibrary}/${samplefilesgame1target}"
+# --> replace `Content\Content.mgcb` with `..\MonoGameKickstarter.GameLibrary\Content\Content.mgcb` in file `MonoGameKickstarter.OpenGL/MonoGameKickstarter.OpenGL.csproj`
+game1targetfile="${slndir}/${solutionname}.${gamelibrary}/${samplefilesgame1target}"
 namespacereplacestring="${solutionname}"
 awk -i inplace -v AWK="${namespacereplacestring}" '{sub(/MONOGAMEKICKSTARTERNAMESPACE/,AWK)}1' ${game1targetfile}
 #
-# replace public by internal in Game1 to avoid CS0436 
-# --> Warning CS0436 The type 'Game1' in 'slnname.NetStandardLibrary\Game1.cs' conflicts with the imported type 'Game1' in 'slnname.NetStandardLibrary, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'slnname.NetStandardLibrary\Game1.cs'.
-accessmodifierreplacestring="internal class "
-awk -i inplace -v AWK="${accessmodifierreplacestring}" '{sub(/public class /,AWK)}1' ${game1targetfile}
+#öö# replace public by internal in Game1 to avoid CS0436 
+#öö# --> Warning CS0436 The type 'Game1' in 'slnname.GameLibrary\Game1.cs' conflicts with the imported type 'Game1' in 'slnname.GameLibrary, #ööVersion=1.0.0.0, Culture=neutral, PublicKeyToken=null'. Using the type defined in 'slnname.GameLibrary\Game1.cs'.
+#ööaccessmodifierreplacestring="internal class "
+#ööawk -i inplace -v AWK="${accessmodifierreplacestring}" '{sub(/public class /,AWK)}1' ${game1targetfile}
 #
 if [ $w == y ]; then
-# add Game1.cs from net standard project as link to WinDX project (TODO check if option set! / project exists)
+# add Game1.cs from GameLibrary project as link to WinDX project (TODO check if option set! / project exists)
 windowsdxprojectfullpath="${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
-sed -i '20i    <ItemGroup>' "${windowsdxprojectfullpath}"
-sed -i '21i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs" Link="Game1.cs" />' "${windowsdxprojectfullpath}"
-sed -i '22i    </ItemGroup>' "${windowsdxprojectfullpath}"
+sed -i '21i    <ItemGroup>' "${windowsdxprojectfullpath}"
+sed -i '22i    <Compile Include="..\\\'${solutionname}.${gamelibrary}'\\\Game1.cs" Link="Game1.cs" />' "${windowsdxprojectfullpath}"
+sed -i '23i    </ItemGroup>' "${windowsdxprojectfullpath}"
 fi
 #
-# add Game1.cs from net standard project as link to OpenGL project (TODO check if option set! / project exists)
+# add Game1.cs from GameLibrary project as link to OpenGL project (TODO check if option set! / project exists)
 # we seem to have a slight template difference, so we need to add the lines one line further in comparison
 # with the windowsdx project
 desktopglprojectfullpath="${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
-sed -i '20i    <ItemGroup>' "${desktopglprojectfullpath}"
-sed -i '21i    <Compile Include="..\\\'${solutionname}.${netstandardlibrary}'\\\Game1.cs" Link="Game1.cs" />' "${desktopglprojectfullpath}"
-sed -i '22i    </ItemGroup>' "${desktopglprojectfullpath}"
+sed -i '21i    <ItemGroup>' "${desktopglprojectfullpath}"
+sed -i '22i    <Compile Include="..\\\'${solutionname}.${gamelibrary}'\\\Game1.cs" Link="Game1.cs" />' "${desktopglprojectfullpath}"
+sed -i '23i    </ItemGroup>' "${desktopglprojectfullpath}"
 #
 # ??????????????????????????????????????????????????????????????????
 # ??????????????????????????????????????????????????????????????????
@@ -800,10 +790,23 @@ if [ $w == y ]; then
 # </PropertyGroup>
 # TIPP: replacing ' with '\'' helps...
 windowsdxprojectfullpath="${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
-sed -i '13i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Debug|AnyCPU'\''">' "${windowsdxprojectfullpath}"
-sed -i '14i     <DefineConstants>TRACE;WINDOWSDX</DefineConstants>' "${windowsdxprojectfullpath}"
-sed -i '15i    </PropertyGroup>' "${windowsdxprojectfullpath}"
+sed -i '14i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Debug|AnyCPU'\''">' "${windowsdxprojectfullpath}"
+sed -i '15i     <DefineConstants>TRACE;WINDOWSDX</DefineConstants>' "${windowsdxprojectfullpath}"
+sed -i '16i    </PropertyGroup>' "${windowsdxprojectfullpath}"
 fi
+#########################################äääääääääää
+if [ $w == y ]; then
+# add MonoGameContentReference WINDOWSDX
+# TIPP: replacing ' with '\'' helps...
+#	<ItemGroup>
+#		<MonoGameContentReference Include="..\GAMELIBTEST7.GameLibrary\Content\Content.mgcb" />
+#	</ItemGroup>
+windowsdxprojectfullpath="${slndir}/${solutionname}.${windowsdx}/${solutionname}.${windowsdx}.csproj"
+sed -i '21i    <ItemGroup>' "${windowsdxprojectfullpath}"
+sed -i '22i     <MonoGameContentReference Include="..\\\'${solutionname}.${gamelibrary}'\\\Content\\\'${samplefilesgamelibrarycontenttarget}'" />' "${windowsdxprojectfullpath}"
+sed -i '23i    </ItemGroup>' "${windowsdxprojectfullpath}"
+fi
+###########################################äääää
 #
 # add CCS DESKTOPGL (TODO check if option set! / project exists)
 # <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -811,26 +814,67 @@ fi
 # </PropertyGroup>
 # TIPP: replacing ' with '\'' helps...
 desktopglprojectfullpath="${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
-sed -i '12i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Debug|AnyCPU'\''">' "${desktopglprojectfullpath}"
-sed -i '13i      <DefineConstants>TRACE;DESKTOPGL</DefineConstants>' "${desktopglprojectfullpath}"
-sed -i '14i    </PropertyGroup>' "${desktopglprojectfullpath}"
+sed -i '13i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Debug|AnyCPU'\''">' "${desktopglprojectfullpath}"
+sed -i '14i      <DefineConstants>TRACE;DESKTOPGL</DefineConstants>' "${desktopglprojectfullpath}"
+sed -i '15i    </PropertyGroup>' "${desktopglprojectfullpath}"
 # ??????????????????????????????????????????????????????????????????
 # ??????????????????????????????????????????????????????????????????
 # ??????????????????????????????????????????????????????????????????
+#########################################äääääääääää
+# add MonoGameContentReference DESKTOPGL
+# TIPP: replacing ' with '\'' helps...
+#	<ItemGroup>
+#		<MonoGameContentReference Include="..\GAMELIBTEST7.GameLibrary\Content\Content.mgcb" />
+#	</ItemGroup>
+desktopglprojectfullpath="${slndir}/${solutionname}.${desktopgl}/${solutionname}.${desktopgl}.csproj"
+sed -i '20i    <ItemGroup>' "${desktopglprojectfullpath}"
+sed -i '21i     <MonoGameContentReference Include="..\\\'${solutionname}.${gamelibrary}'\\\Content\\\'${samplefilesgamelibrarycontenttarget}'" />' "${desktopglprojectfullpath}"
+sed -i '22i    </ItemGroup>' "${desktopglprojectfullpath}"
+###########################################äääää
+#ANDROID
+
+#üüü  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+#üüü    <DefineConstants>$(DefineConstants)TRACE;ANDROID</DefineConstants>
+#üüü  </PropertyGroup>
+#
+#üüü  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+#üüü    <DefineConstants>$(DefineConstants)TRACE;ANDROID</DefineConstants>
+#üüü  </PropertyGroup>
+#
+#üüü  <ItemGroup>
+#üüü    <Compile Include="..\GAMELIBTEST06.GameLibrary\Game1.cs" Link="Game1.cs" />
+#üüü  </ItemGroup>
+
+#########################################äääääääääää
+if [ $a == y ]; then
+# add CCS and link to Game Library Game1.cs ANDROID
+# TIPP: replacing ' with '\'' helps...
+androidprojectfullpath="${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj"
+sed -i '10i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Debug|AnyCPU'\''">' "${androidprojectfullpath}"
+sed -i '11i      <DefineConstants>$(DefineConstants)TRACE;ANDROID</DefineConstants>' "${androidprojectfullpath}"
+sed -i '12i    </PropertyGroup>' "${androidprojectfullpath}"
+sed -i '13i    <PropertyGroup Condition="'\''$(Configuration)|$(Platform)'\''=='\''Release|AnyCPU'\''">' "${androidprojectfullpath}"
+sed -i '14i      <DefineConstants>$(DefineConstants)TRACE;ANDROID</DefineConstants>' "${androidprojectfullpath}"
+sed -i '15i    </PropertyGroup>' "${androidprojectfullpath}"
+sed -i '16i    <ItemGroup>' "${androidprojectfullpath}"
+sed -i '17i    <Compile Include="..\\\'${solutionname}.${gamelibrary}'\\\Game1.cs" Link="Game1.cs" />' "${androidprojectfullpath}"
+sed -i '18i    </ItemGroup>' "${androidprojectfullpath}"
+###########################################äääää
+# add Content references ANDROID
+#
+#üüü	<ItemGroup>
+#üüü		<MonoGameContentReference Include="..\GAMELIBTEST06.GameLibrary\Content\Content.mgcb" Visible="false" />
+#üüü		<MonoGameContentReference Include="Content\AndroidContent.mgcb" />
+#üüü	</ItemGroup>
+#
+androidprojectfullpath="${slndir}/${solutionname}.${android}/${solutionname}.${android}.csproj"
+sed -i '26i    <ItemGroup>' "${androidprojectfullpath}"
+sed -i '27i     <MonoGameContentReference Include="..\\\'${solutionname}.${gamelibrary}'\\\Content\\\Content.mgcb" Visible="false" />' "${androidprojectfullpath}"
+sed -i '28i     <MonoGameContentReference Include="Content\\\'${samplefilesandroidcontenttarget}'" />' "${androidprojectfullpath}"
+sed -i '29i    </ItemGroup>' "${androidprojectfullpath}"
+fi
+###########################################äääää
+
 # finished
 echo "${delimiter}"
 echo 'Everything done! :-)'
-
-# TODO monogame-kickstarter.sh:
-# add reference to net standard to android project (does not work for some reason maybe with update of .net core).
-# The gitignore does exclude all subdirs because we don't want our generated projects folders added to the MonoGame Kickstarter repo!
-# There is a line in the gitignore to include the mgks folder, which we want to have inside the MonoGame Kickstarter repo but it does not work
-# for some reason --> check the gitignore file
-#
-# TODO in generated solutions / projects:
-# Add the android project to the solution 
-# Add a reference to the android project to the net standard library project
-#
-# Add Game1.cs from the net standard library project to all other projects as link (important!)
-# Add Conditional compilation symbols to each project except the net standard library ("ANDROID" to the android project, "DESKTOPGL" to the desktopgl project, etc.)
-# --> The opengl project should now run with green instead of cornflower blue background

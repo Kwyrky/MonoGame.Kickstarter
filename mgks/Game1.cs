@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 
-namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
+namespace MONOGAMEKICKSTARTERNAMESPACE.GameLibrary
 {
     public class Game1 : Game
     {
@@ -31,6 +31,7 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.GraphicsProfile = GraphicsProfile.HiDef;
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -79,7 +80,7 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
             baseWorld = Matrix.CreateScale(5.0f) * Matrix.CreateTranslation(2.0f * Vector3.Forward);
             world = Matrix.Identity;
             view = Matrix.CreateLookAt(Vector3.Zero, Vector3.Forward, Vector3.Up);
-            projection = Matrix.CreatePerspective(10.0f * GraphicsDevice.Viewport.AspectRatio, 10.0f, 1.0f, 1000.0f);
+            projection = Matrix.CreatePerspective(4.0f * GraphicsDevice.Viewport.AspectRatio, 4.0f, 1.0f, 1000.0f);
         }
 
         private void LoadEffect()
@@ -132,7 +133,7 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
 
         private void UpdateAnimation(GameTime gameTime)
         {
-            float radians = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds));
+            float radians = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2));
             world = Matrix.CreateRotationZ(radians);
         }
 
@@ -142,13 +143,14 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
 
             // ClearBackgroundBasedOnCurrentPlatform(platform);
             ClearBackgroundBasedOnConditionalCompilationSymbol();
-            DrawQuad();
+            DrawQuad(gameTime);
 
             base.Draw(gameTime);
         }
 
-        private void DrawQuad()
+        private void DrawQuad(GameTime gameTime)
         {
+            float time = (float)gameTime.ElapsedGameTime.TotalSeconds;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
 
             GraphicsDevice.Indices = indexBuffer;
@@ -158,6 +160,7 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
             effect.Parameters["View"].SetValue(view);
             effect.Parameters["Projection"].SetValue(projection);
             effect.Parameters["Texture"].SetValue(texture);
+            effect.Parameters["Time"].SetValue(time);
 
             foreach (EffectPass pass in effect.CurrentTechnique.Passes)
             {
@@ -168,12 +171,14 @@ namespace MONOGAMEKICKSTARTERNAMESPACE.NetStandardLibrary
 
         private void ClearBackgroundBasedOnConditionalCompilationSymbol()
         {
-#if ANDROID // After the Android project has been added to the solution add "ANDROID" to "Conditional compilation symbols" (Project Properties|Build|Conditional compilation symbols)
+#if ANDROID
             GraphicsDevice.Clear(Color.MonoGameOrange);
 #elif DESKTOPGL
             GraphicsDevice.Clear(Color.Lime);
-#else
+#elif WINDOWSDX
             GraphicsDevice.Clear(Color.CornflowerBlue);
+#else
+            GraphicsDevice.Clear(Color.Gray);
 #endif
         }
 

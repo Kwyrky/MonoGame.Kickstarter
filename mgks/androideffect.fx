@@ -11,17 +11,28 @@ float4x4 World;
 float4x4 View;
 float4x4 Projection;
 
+#if OPENGL
 texture Texture;
- 
 sampler TextureSampler = sampler_state
 {
     texture = <Texture>;
+    MagFilter = linear;
+    MinFilter = linear;
+    MipFilter = linear;
+    AddressU = wrap;
+    AddressV = wrap;
+};
+#else
+Texture2D Texture;
+SamplerState TextureSampler
+{
     magfilter = LINEAR;
     minfilter = LINEAR;
     mipfilter = LINEAR;
-    AddressU = WRAP;
-    AddressV = WRAP;
+    AddressU = Wrap;
+    AddressV = Wrap;
 };
+#endif
 
 struct VertexShaderInput
 {
@@ -62,8 +73,12 @@ PixelShaderOutput PixelShaderFunction(VertexShaderOutput input)
 {
     PixelShaderOutput output;
  
-    output.Color = input.Color * tex2D(TextureSampler, input.UV);
- 
+#if OPENGL
+    output.Color = input.Color * tex2D(TextureSampler, input.UV * 2);
+#else
+    output.Color = input.Color * Texture.Sample(TextureSampler, input.UV * 2);
+#endif
+
     return output;
 }
  
