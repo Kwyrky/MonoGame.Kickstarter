@@ -6,26 +6,31 @@ A bash script that lets you quickly create MonoGame projects ready for cross-pla
 
 ## Quickstart
 
-`monogame-kickstarter.sh [solutionname]`
+```
+$ monogame-kickstarter.sh [solutionname]
+$ ./monogame-kickstarter.sh "MonoGameKickstarterMG"
+$ ./monogame-kickstarter.sh -owa "MonoGameKickstarterMG"
+$ ./monogame-kickstarter.sh -o -w -a "MonoGameKickstarterMG"
+$ ./monogame-kickstarter.sh --mgdesktopgl --mgwindowsdx --mgandroid "MonoGameKickstarterMG"
+```
+This is all you need to do and MonoGame Kickstarter will create a solution with a MonoGame .NET Game Library project and an OpenGL project referencing it and optionally projects for Windows DirectX and Android if specified with the parameters. The OpenGL project and optional projects will use code and content (Android has it's own content!) from the MonoGame .NET Game Library project. Just open `Game1.cs` from the MonoGame .NET Game Library project and you can immediately start developing your MonoGame project.
 
-This is all you need to do and MonoGame Kickstarter will create a solution with a MonoGame .NET Standard Library project and an OpenGL project referencing it. The OpenGL project will use code and content from the MonoGame .NET Standard Library project. Just open `Game1.cs` from the MonoGame .NET Standard Library project and you can immediately start developing your MonoGame project.
+There is some example code provided which puts something on the screen as a starting place but you can of course delete it or change it however you like.
 
 ## Parameters
 
-All parameters must come before the optional non-option parameter for the solutionname / foldername.
+All optional parameters must come before the mandatory parameter for the solutionname / foldername.
 
-The script supports at this point only OpenGL projects (`-o` or `--mgdesktopgl`), Windows DirectX projects (`-w` or `--mgwindowsdx`). Android projects should work too (with git bash on Windows) but have to be added
-manually to the solution inside visual studio (right click the solution in visual studio and choose add existing project and add the Android csproj file of the generated project).
+At this point the script supports 
+1. OpenGL projects (`-o` or `--mgdesktopgl`)
+2. Windows DirectX projects (`-w` or `--mgwindowsdx`) 
+3. Android projects (`-a` or `--mgandroid`).
 
 For example the command
 
-`monogame-kickstarter.sh -ow [solutionname]`
-
-will generate the three projects for opengl / desktopgl, windows and the .NET Standard class library project for the shared code and use the given non-option argument [solutionname] as root folder name and also as solutionname for the generated visual studio solution.
-
 `monogame-kickstarter.sh -owa [solutionname]`
 
-will generate the four projects for opengl / desktopgl, windows, android and the .NET Standard class library project for the shared code and use the given non-option argument [solutionname] as root folder name and also as solutionname for the generated visual studio solution.
+will generate projects for all three supported project types and one project for the shared code. The mandatory argument [solutionname] will be used as target root folder which the script will create as a subfolder. It is also used as the solutionname for the generated visual studio solution.
 
 ## Support
 
@@ -38,7 +43,7 @@ GITHUB: https://github.com/Kwyrky
 
 ## Works with Linux and Windows
 
-The script can be used on Linux with bash or on Windows with git bash which comes with the installation of git for Windows!
+The script can be used on Linux with **bash** or on Windows with **git bash** which comes with the installation of git for Windows!
 
 You can run the script in git bash and pass either `-w` or `--mgwindowsdx` as parameter to make it generate a Windows DirectX project.
 
@@ -51,7 +56,7 @@ If the default values for both options are turned off you can enable them each t
 
 ## Demo Videos 
 
-Demo videos are available on my YouTube channel, please subscribe and hit the bell :-)
+Demo videos are available on my YouTube channel, please subscribe and hit the bell ;-)
 
 https://youtube.com/user/kwyrky
 
@@ -65,9 +70,9 @@ The script makes use of the **.NET Core SDK** and the official **MonoGame templa
 
 ## What it does
 
-The aim of the script is to provide a convenient (quick) way to set up a new solution which can be used for new multipülatform MonoGame projects. As a starting point it creates a solution containing a **MonoGame NetStandard Library** project and a **MonoGame Cross-Platform Desktop Application (OpenGL)** project as a starting point for development. Later it is possible to manually add or remove more MonoGame projects from the official MonoGame templates to the solution. So there should be no disadvantage in using this script.
+The aim of the script is to provide a convenient (quick) way to set up a new solution which can be used for new multiplatform MonoGame projects. As a starting point it creates a solution containing a **MonoGame .NET Game Library** project and a **MonoGame Cross-Platform Desktop Application (OpenGL)** project as a starting point for development. Later it is possible to manually add or remove more MonoGame projects from the official MonoGame templates to the solution. So there should be no disadvantage in using this script.
 
-Note: The script deletes `Game1.cs` and `Content` generated by the **MonoGame Cross-Platform Desktop Application (OpenGL)** template and then sets up a link to the Content project (Content.mgcb) generated by the **MonoGame NetStandard Library** template. The idea is that the **MonoGame Cross-Platform Desktop Application (OpenGL)** project should use not only the shared code of the **MonoGame NetStandard Library** but also the content of the **MonoGame NetStandard Library** project.
+Note: The script deletes `Game1.cs` and `Content` generated by the **MonoGame Cross-Platform Desktop Application (OpenGL)** template and then sets up a link to the Content project (Content.mgcb) generated by the **MonoGame .NET Game Library** template. The idea is that the **MonoGame Cross-Platform Desktop Application (OpenGL)** project should use not only the shared code of the **MonoGame .NET Game Library** but also the content of the **MonoGame .NET Game Library** project.
 
 ## [OPTIONAL] Install globally
 
@@ -87,14 +92,15 @@ Not all projects can be generated on each platform. So as default only the **Mon
 
 ## Templates
 
-| Templates                                              | Short Name    | Language | Tags     |
-|--------------------------------------------------------|---------------|----------|----------|
-| MonoGame Android Application                           | mgandroid     | [C#]     | MonoGame |
-| MonoGame Cross-Platform Desktop Application (OpenGL)   | mgdesktopgl   | [C#]     | MonoGame |
-| MonoGame iPhone/iPad Application                       | mgios         | [C#]     | MonoGame |
-| MonoGame Windows Universal Application (CoreApp)       | mguwpcore     | [C#]     | MonoGame |
-| MonoGame Windows Universal Application (XAML)          | mguwpxaml     | [C#]     | MonoGame |
-| MonoGame Windows Desktop Application (Windows DirectX) | mgwindowsdx   | [C#]     | MonoGame |
-| MonoGame NetStandard Library                           | mgnetstandard | [C#]     | MonoGame |
-| MonoGame Pipeline Extension                            | mgpipeline    | [C#]     | MonoGame |
-| MonoGame Shared Library Project                        | mgshared      | [C#]     | MonoGame |
+`$ dotnet new --list | grep "MonoGame"`
+
+| Templates                                              | Short Name    | Language | Tags                                         |
+|--------------------------------------------------------|---------------|----------|----------------------------------------------|
+| MonoGame Android Application                           | mgandroid     | [C#]     | MonoGame/Games/Mobile/Android                |
+| MonoGame Content Pipeline Extension                    | mgpipeline    | [C#]     | MonoGame/Games/Extensions                    |
+| MonoGame Cross-Platform Desktop Application            | mgdesktopgl   | [C#]     | MonoGame/Games/Desktop/Windows/Linux/macOS   |
+| MonoGame Game Library                                  | mglib         | [C#]     | MonoGame/Games/Library                       |
+| MonoGame iOS Application                               | mgios         | [C#]     | MonoGame/Games/Mobile/iOS                    |
+| MonoGame Shared Library Project                        | mgshared      | [C#]     | MonoGame/Games/Library                       |
+| MonoGame Windows Desktop Application                   | mgwindowsdx   | [C#]     | MonoGame/Games/Desktop/Windows/Linux/macOS   |
+| MonoGame Windows Universal XAML Application            | mguwpxaml     | [C#]     | MonoGame/Games/Desktop/Windows/Xbox/UWP/XAML |
