@@ -705,8 +705,8 @@ fi
 if [ $a == y ]; then
 echo "${delimiter}"
 echoverbose "Copy splash screen files to ${android} project"
-cp "$BASEPATH/$androidbasedir/$androidsplashimagesource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Drawable/$androidsplashimagetarget"
-cp "$BASEPATH/$androidbasedir/$androidsplashstylessource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Values/$androidsplashstylestarget"
+cp "$BASEPATH/$androidbasedir/$androidsplashimagesource" "$workingdir/${slndir}/${solutionname}.${android}/Resources/Drawable/$androidsplashimagetarget"
+cp "$BASEPATH/$androidbasedir/$androidsplashstylessource" "$workingdir/${slndir}/${solutionname}.${android}/Resources/Values/$androidsplashstylestarget"
 # TODO check if source files exist and verify files got copied after cp commands
 # only if cp commands were successful modify the android project's Activity1.cs to use the splash image!
 # add line to Activity1.cs
@@ -730,21 +730,21 @@ sed -i '57d' "${androidproj}"
 fi
 #
 # copy mgks files to GameLibrary project
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibraryeffectsource}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibraryeffectarget}"
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibrarytexturesource}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarytexturetarget}"
-rm "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarycontenttarget}"
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibrarycontentsource}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarycontenttarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibraryeffectsource}" "$workingdir/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibraryeffectarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibrarytexturesource}" "$workingdir/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarytexturetarget}"
+rm "$workingdir/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarycontenttarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgamelibrarycontentsource}" "$workingdir/${slndir}/${solutionname}.${gamelibrary}/${content}/${samplefilesgamelibrarycontenttarget}"
 #
 if [ $a == y ]; then
 # copy mgks files to android project
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroideffectsource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroideffectarget}"
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidtexturesource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidtexturetarget}"
-rm "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontentgenerated}"
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidcontentsource}" "$BASEPATH/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontenttarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroideffectsource}" "$workingdir/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroideffectarget}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidtexturesource}" "$workingdir/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidtexturetarget}"
+rm "$workingdir/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontentgenerated}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesandroidcontentsource}" "$workingdir/${slndir}/${solutionname}.${android}/${content}/${samplefilesandroidcontenttarget}"
 #
 fi
 # copy Game1.cs with sample code from mgks folder to GameLibrary project folder
-cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgame1source}" "$BASEPATH/${slndir}/${solutionname}.${gamelibrary}/${samplefilesgame1target}"
+cp "$BASEPATH/${dirnamesamplefiles}/${samplefilesgame1source}" "$workingdir/${slndir}/${solutionname}.${gamelibrary}/${samplefilesgame1target}"
 #
 # add Game1.cs from GameLibrary project as link
 sed -i '56i    <Compile Include="..\\\'${solutionname}.${gamelibrary}'\\\Game1.cs" Link="Game1ANDROID">' "${androidproj}"
