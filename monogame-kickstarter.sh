@@ -1,6 +1,6 @@
 #! /bin/bash
 
-version="1.07"
+version="1.08"
 
 scriptname="monogame-kickstarter.sh"
 
@@ -10,7 +10,6 @@ delimiter="#####################################################################
 gamelibrary="GameLibrary"
 #
 android="Android"
-#desktopgl="OpenGL"
 desktopgl="DesktopGL"
 ios="iOS"
 uwpcore="UWPCore"
@@ -18,9 +17,11 @@ uwpxaml="UWPXaml"
 windowsdx="WindowsDX"
 #
 # files needed for the splash screen
-# "*source*" consts are the names of the files in the script base dir
+# "*source*" consts are the names of the files in the script base dir or defined base dir
 # "*target*" consts are the names of the files in the android project dir (inside the respective subdirs)
 # look at the cp commands at the bottom of the script
+#
+androidbasedir="mgks-resources"
 androidsplashimagesource="MonoGameKickstarter-Splash-1080x1920.png"
 androidsplashimagetarget="Splash.png"
 androidsplashstylessource="Styles.xml"
@@ -132,7 +133,7 @@ mguwpcore="$u"
 x=n
 mguwpxaml="$x"
 #
-w=n
+w=y
 mgwindowsdx="$w"
 
 
@@ -370,7 +371,7 @@ SCRIPTPATH="$0"
 REALPATH="$(realpath "$SCRIPTPATH")"
 BASEPATH="$(dirname "$REALPATH")"
 if [ $r == y ]; then
-cat "$BASEPATH/MonoGameKickstarterLogoWhite.txt"
+cat "$BASEPATH/$androidbasedir/MonoGameKickstarterLogoWhite.txt"
 else
 echo "${delimiter}"
 fi
@@ -704,8 +705,8 @@ fi
 if [ $a == y ]; then
 echo "${delimiter}"
 echoverbose "Copy splash screen files to ${android} project"
-cp "$BASEPATH/$androidsplashimagesource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Drawable/$androidsplashimagetarget"
-cp "$BASEPATH/$androidsplashstylessource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Values/$androidsplashstylestarget"
+cp "$BASEPATH/$androidbasedir/$androidsplashimagesource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Drawable/$androidsplashimagetarget"
+cp "$BASEPATH/$androidbasedir/$androidsplashstylessource" "$BASEPATH/${slndir}/${solutionname}.${android}/Resources/Values/$androidsplashstylestarget"
 # TODO check if source files exist and verify files got copied after cp commands
 # only if cp commands were successful modify the android project's Activity1.cs to use the splash image!
 # add line to Activity1.cs
